@@ -1,10 +1,10 @@
-﻿import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import KeycloakProvider from "next-auth/providers/keycloak";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 async function refreshAccessToken(token: any) {
   try {
-    const keycloakUrl = process.env.KEYCLOAK_INTERNAL_URL || process.env.KEYCLOAK_ISSUER || "http://127.0.0.1:8080/realms/master";
+    const keycloakUrl = process.env.KEYCLOAK_ISSUER || "http://127.0.0.1:8080/realms/master";
     const tokenUrl = `${keycloakUrl}/protocol/openid-connect/token`;
 
     const params = new URLSearchParams({
@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
       // NextAuth matches the token internally with the `issuer` returned by the server. 
       // The server openid-configuration returns issuer as "http://keycloak:8080/realms/master"
       // So we must use THAT exact string as issuer here, and then manually override the external authorization URL.
-      issuer: process.env.KEYCLOAK_INTERNAL_URL || "http://keycloak:8080/realms/master",
+      issuer: process.env.KEYCLOAK_INTERNAL_URL || process.env.KEYCLOAK_ISSUER || "http://127.0.0.1:8080/realms/master",
       authorization: {
         url: `${process.env.KEYCLOAK_ISSUER || "http://localhost:8080/realms/master"}/protocol/openid-connect/auth`,
         params: { scope: "openid email profile" },
@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
         
         try {
           // Use internal docker hostname if available, else localhost
-          const keycloakUrl = process.env.KEYCLOAK_INTERNAL_URL || process.env.KEYCLOAK_ISSUER || "http://127.0.0.1:8080/realms/master";
+          const keycloakUrl = process.env.KEYCLOAK_ISSUER || "http://127.0.0.1:8080/realms/master";
           const tokenUrl = `${keycloakUrl}/protocol/openid-connect/token`;
           
           const params = new URLSearchParams({
@@ -90,13 +90,13 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Failed to authenticate");
           }
 
-          // Return a mock user object with the token
+          // Return a user object with the tokens and expiration
           return {
             id: credentials.username,
             name: credentials.username,
-            // Pass the access token to the JWT callback
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
+            expires_at: Math.floor(Date.now() / 1000) + tokens.expires_in,
           } as any;
         } catch (e) {
           return null;
@@ -109,11 +109,12 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, user }) {
       // Initial sign in
       if (account && user) {
+        const expiresAt = (account.expires_at || (user as any).expires_at || 0) * 1000;
         return {
           ...token,
           accessToken: account.access_token || (user as any).access_token,
           refreshToken: account.refresh_token || (user as any).refresh_token,
-          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : Date.now() + 5 * 60 * 1000,
+          accessTokenExpires: expiresAt || Date.now() + 5 * 60 * 1000,
           user,
         };
       }

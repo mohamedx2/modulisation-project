@@ -1,4 +1,4 @@
-﻿import { Controller, Get } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { AuthenticatedUser, Roles } from 'nest-keycloak-connect';
 import { KeycloakUser } from '../core/security/keycloak-user.interface';
@@ -10,6 +10,6 @@ export class DashboardController {
   @Get('stats')
   @Roles({ roles: ['realm:user', 'realm:admin'] })
   getStats(@AuthenticatedUser() user: KeycloakUser) {
-    return this.dashboardService.getStats();
+    return this.dashboardService.getStats(user.tenantId || 'default-tenant-id');
   }
 }

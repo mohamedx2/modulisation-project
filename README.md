@@ -1,4 +1,4 @@
-﻿# Renault Axis - Internal Command Panel (Modulisation Project)
+# Renault Axis - Internal Command Panel (Modulisation Project)
 
 ![Renault Axis Header](https://via.placeholder.com/800x200.png?text=Renault+Axis+Command+Panel)
 
@@ -15,27 +15,29 @@ This project replaces legacy manual data entry and disjointed systems with a uni
 - **Ticket Management:** Create, track, and update intervention tickets and service demands.
 - **Payment Tracking:** Monitor revenue, pending payments, and transaction history.
 - **Dynamic 2-Step Workflows:** OTP verification and service selection logic built natively with React context and state.
-- **Animated, Responsive UI:** A highly polished, kinetic interface built with Tailwind CSS and Framer Motion.
+- **Observability & Health:** Integrated **Prometheus** metrics endpoint and real-time system status indicators.
+- **Animated, Responsive UI:** A highly polished, kinetic interface built with Tailwind CSS and Framer Motion, utilizing glassmorphism and bento-grid layouts.
 
 ## 🛠️ Technology Stack
 
 ### Frontend (User Interface)
-- **Framework:** Next.js (App Router)
-- **Styling:** Tailwind CSS
+- **Framework:** Next.js 16 (App Router)
+- **Styling:** Tailwind CSS 4
 - **Animations:** Framer Motion
 - **Icons:** Lucide React
-- **Auth:** Next-Auth (connecting to Keycloak)
+- **Auth:** Next-Auth v4
 
 ### Backend (API & Services)
-- **Framework:** NestJS
-- **Database:** PostgreSQL
+- **Framework:** NestJS 11
+- **Database:** PostgreSQL 15
 - **ORM:** Prisma
-- **OCR Engine:** Tesseract.js (Node wrapper)
-- **Testing:** Jest
+- **OCR Engine:** Tesseract.js
+- **Monitoring:** Prometheus & Grafana
 
 ### Infrastructure
 - **Containerization:** Docker & Docker Compose
-- **Identity & Access:** Keycloak
+- **Identity & Access:** Keycloak 24
+- **Gateway:** Nginx
 
 ## ⚙️ Getting Started
 
@@ -51,8 +53,9 @@ This project replaces legacy manual data entry and disjointed systems with a uni
    cd modulisation-project
    ```
 
-2. **Start the Infrastructure (Database, Keycloak, Backend, Frontend):**
+2. **Start the Infrastructure:**
    ```bash
+   cd infrastructure
    docker-compose up -d --build
    ```
 
@@ -60,44 +63,19 @@ This project replaces legacy manual data entry and disjointed systems with a uni
    - **Frontend:** http://localhost:3000
    - **Backend API:** http://localhost:3001
    - **Keycloak Admin:** http://localhost:8080
-
-### Local Development
-
-**Backend setup:**
-```bash
-cd backend
-npm install
-npx prisma generate
-npx prisma db push
-npm run start:dev
-```
-
-**Frontend setup:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
+   - **Grafana:** http://localhost:3002
 
 ## 📂 Project Structure
 
 ```
 modulisation-project/
-├── backend/                  # NestJS API, Prisma Schema, OCR Logic
-│   ├── prisma/               # Database definitions & migrations
-│   └── src/
-│       ├── auth/             # SSO Integration
-│       ├── ocr/              # Tesseract License Plate scanning
-│       ├── tickets/          # Intervention management
-│       ├── payments/         # Financial ledgers
-│       └── otp/              # Security verification step
-├── frontend/                 # Next.js Application
-│   ├── app/
-│   │   ├── dashboard/        # Main authenticated area (Tickets, OCR, Payments)
-│   │   ├── login/            # SSO Entry point
-│   │   └── adminDashboard/   # Administrative views
-│   └── public/
-└── docker-compose.yml        # Orchestration (DB, Keycloak, App)
+├── apps/
+│   ├── backend/              # NestJS API, Prisma Schema, OCR Logic
+│   ├── frontend/             # Next.js Application
+│   └── gateway/              # Nginx configuration
+├── infrastructure/           # Docker Compose, Monitoring, CI/CD
+├── packages/                 # Shared libraries (shared types, etc.)
+└── docker-compose.yml        # (Symlink or reference to infrastructure)
 ```
 
 ## 🔒 Authentication Flow

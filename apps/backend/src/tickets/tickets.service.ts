@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+ï»¿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
@@ -29,6 +29,7 @@ export class TicketsService {
         tenantId,
         deletedAt: null,
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -38,13 +39,12 @@ export class TicketsService {
     const enAttente = await this.prisma.ticket.count({ where: { tenantId, deletedAt: null, status: 'PENDING' }});
     const clotures = await this.prisma.ticket.count({ where: { tenantId, deletedAt: null, status: 'CLOSED' }});
 
-    // Provide mock data if the db is empty so the UI looks good initially
     if (total === 0) {
       return [
-        { label: 'Total', value: '248', icon: 'AlertCircle', color: 'text-gray-900' },
-        { label: 'En cours', value: '12', icon: 'Clock', color: 'text-blue-600' },
-        { label: 'En attente', value: '5', icon: 'Clock', color: 'text-amber-600' },
-        { label: 'Clôturés', value: '231', icon: 'CheckCircle2', color: 'text-emerald-600' },
+        { label: 'Total', value: '0', icon: 'AlertCircle', color: 'text-gray-900' },
+        { label: 'En cours', value: '0', icon: 'Clock', color: 'text-blue-600' },
+        { label: 'En attente', value: '0', icon: 'Clock', color: 'text-amber-600' },
+        { label: 'ClÃ´turÃ©s', value: '0', icon: 'CheckCircle2', color: 'text-emerald-600' },
       ];
     }
 
@@ -52,7 +52,7 @@ export class TicketsService {
       { label: 'Total', value: total.toString(), icon: 'AlertCircle', color: 'text-gray-900' },
       { label: 'En cours', value: enCours.toString(), icon: 'Clock', color: 'text-blue-600' },
       { label: 'En attente', value: enAttente.toString(), icon: 'Clock', color: 'text-amber-600' },
-      { label: 'Clôturés', value: clotures.toString(), icon: 'CheckCircle2', color: 'text-emerald-600' },
+      { label: 'ClÃ´turÃ©s', value: clotures.toString(), icon: 'CheckCircle2', color: 'text-emerald-600' },
     ];
   }
 

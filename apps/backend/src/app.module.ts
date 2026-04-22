@@ -23,6 +23,8 @@ import { PaymentsModule } from './payments/payments.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DashboardModule } from './dashboard/dashboard.module';
 
+import { MetricsController } from './core/metrics/metrics.controller';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -40,9 +42,12 @@ import { DashboardModule } from './dashboard/dashboard.module';
       authServerUrl: process.env.KEYCLOAK_URL || 'http://localhost:8080',
       realm: process.env.KEYCLOAK_REALM || 'master',
       clientId: process.env.KEYCLOAK_CLIENT_ID || 'backend',
-      secret: 'secret-if-required',
+      secret: process.env.KEYCLOAK_SECRET || 'secret',
       useNestLogger: true,
       verifyTokenAudience: false,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      tokenValidation: 'online',
     }),
     MailerModule.forRoot({
       transport: {
@@ -71,7 +76,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     PaymentsModule,
     DashboardModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, MetricsController],
   providers: [
     AppService,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

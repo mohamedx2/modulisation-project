@@ -42,7 +42,7 @@ services:
   backend:
     build:
       context: ../apps/backend
-      dockerfile: ../../infrastructure/docker/backend.Dockerfile
+      dockerfile: ../../infrastructure/docker/Dockerfile.backend
     ports:
       - "3001:3001"
     environment:
@@ -54,7 +54,7 @@ services:
       - DB_NAME=renault_db
       - REDIS_URL=redis://redis:6379
       - KEYCLOAK_URL=http://keycloak:8080
-      - KEYCLOAK_REALM=master
+      - KEYCLOAK_REALM=reno
       - KEYCLOAK_CLIENT_ID=backend
     depends_on:
       - db
@@ -66,7 +66,7 @@ services:
   frontend:
     build:
       context: ../apps/frontend
-      dockerfile: ../../infrastructure/docker/frontend.Dockerfile
+      dockerfile: ../../infrastructure/docker/Dockerfile.frontend
     ports:
       - "3000:3000"
     environment:
@@ -74,48 +74,12 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:3001
       - NEXTAUTH_SECRET=my-super-secret-key-for-nextauth
       - NEXTAUTH_URL=http://localhost:3000
-      - KEYCLOAK_INTERNAL_URL=http://keycloak:8080/realms/master
-      - KEYCLOAK_ISSUER=http://localhost:8080/realms/master
-      - KEYCLOAK_ID=frontend
+      - KEYCLOAK_INTERNAL_URL=http://keycloak:8080/realms/reno
+      - KEYCLOAK_ISSUER=http://localhost:8080/realms/reno
+      - KEYCLOAK_ID=reno
       - KEYCLOAK_SECRET=r1jJ2OQ8qg9qf10hI3I5zK5CjO2tV7Nn
     depends_on:
       - backend
-    networks:
-      - saas-network
-
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
-    networks:
-      - saas-network
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3002:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - prometheus
-    volumes:
-      - grafana_data:/var/lib/grafana
-    networks:
-      - saas-network
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - frontend
-      - backend
-      - keycloak
     networks:
       - saas-network
 
@@ -125,5 +89,3 @@ networks:
 
 volumes:
   postgres_data:
-  prometheus_data:
-  grafana_data:
