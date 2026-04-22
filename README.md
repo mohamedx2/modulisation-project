@@ -1,33 +1,113 @@
-# Modulisation Project
+﻿# Renault Axis - Internal Command Panel (Modulisation Project)
 
-## Overview
-This is a fullstack web application comprising a **Next.js** frontend and a **NestJS** backend. It features an integrated Keycloak setup for authentication and Postgres for database management.
+![Renault Axis Header](https://via.placeholder.com/800x200.png?text=Renault+Axis+Command+Panel)
 
-### Stack:
-- **Backend:** NestJS, TypeScript, TypeORM, Postgres, Tesseract.js (OCR), Nodemailer (OTP), Keycloak
-- **Frontend:** Next.js (App Router), React, Tailwind CSS, Framer Motion, NextAuth (Keycloak Provider)
+## 📌 Overview
 
-## Getting Started
+**Renault Axis** is a full-stack, enterprise-grade internal command panel designed to streamline the management of vehicle interventions, client tickets, payment histories, and automated license plate recognition (OCR).
 
-### 1. Prerequisites
-Ensure you have the following installed:
-- Node.js (v18+)
-- Docker & docker-compose
+This project replaces legacy manual data entry and disjointed systems with a unified, high-performance web application utilizing modern architectural patterns (modulisation).
 
-### 2. Environment Variables
-Copy the provided `.env.example` files to `.env` in both the `frontend` and `backend` directories.
-Fill out the required secrets (e.g. database credentials, Keycloak client IDs).
+## 🚀 Key Features
 
-### 3. Run with Docker
-The easiest way to stand up the entire ecosystem is via Docker:
+- **Secure Authentication (SSO):** Integrated with **Keycloak** for robust role-based access control (Admin/Mechanic/User), managed via Next-Auth on the frontend.
+- **License Plate OCR:** Automatic extraction of vehicle plate numbers from images using Tesseract.js directly linked to the NestJS backend.
+- **Ticket Management:** Create, track, and update intervention tickets and service demands.
+- **Payment Tracking:** Monitor revenue, pending payments, and transaction history.
+- **Dynamic 2-Step Workflows:** OTP verification and service selection logic built natively with React context and state.
+- **Animated, Responsive UI:** A highly polished, kinetic interface built with Tailwind CSS and Framer Motion.
+
+## 🛠️ Technology Stack
+
+### Frontend (User Interface)
+- **Framework:** Next.js (App Router)
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Auth:** Next-Auth (connecting to Keycloak)
+
+### Backend (API & Services)
+- **Framework:** NestJS
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **OCR Engine:** Tesseract.js (Node wrapper)
+- **Testing:** Jest
+
+### Infrastructure
+- **Containerization:** Docker & Docker Compose
+- **Identity & Access:** Keycloak
+
+## ⚙️ Getting Started
+
+### Prerequisites
+- [Docker & Docker Compose](https://www.docker.com/)
+- [Node.js](https://nodejs.org/) (v20+)
+
+### Quick Start (Docker)
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/mohamedx2/modulisation-project.git
+   cd modulisation-project
+   ```
+
+2. **Start the Infrastructure (Database, Keycloak, Backend, Frontend):**
+   ```bash
+   docker-compose up -d --build
+   ```
+
+3. **Access the application:**
+   - **Frontend:** http://localhost:3000
+   - **Backend API:** http://localhost:3001
+   - **Keycloak Admin:** http://localhost:8080
+
+### Local Development
+
+**Backend setup:**
 ```bash
-docker-compose up -d
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+npm run start:dev
 ```
-This will launch PostgreSQL, Keycloak, the NestJS Backend, and the Next.js Frontend.
 
-### 4. Local Development
-If running locally outside Docker:
-- Install dependencies: `npm install` (in both `frontend` and `backend` folders)
-- Run the back: `cd backend && npm run start:dev`
-- Run the front: `cd frontend && npm run dev`
-- **Or use VS Code Debug:** Press F5 and select "Fullstack: Debug All" in the VS Code debug pane.
+**Frontend setup:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 📂 Project Structure
+
+```
+modulisation-project/
+├── backend/                  # NestJS API, Prisma Schema, OCR Logic
+│   ├── prisma/               # Database definitions & migrations
+│   └── src/
+│       ├── auth/             # SSO Integration
+│       ├── ocr/              # Tesseract License Plate scanning
+│       ├── tickets/          # Intervention management
+│       ├── payments/         # Financial ledgers
+│       └── otp/              # Security verification step
+├── frontend/                 # Next.js Application
+│   ├── app/
+│   │   ├── dashboard/        # Main authenticated area (Tickets, OCR, Payments)
+│   │   ├── login/            # SSO Entry point
+│   │   └── adminDashboard/   # Administrative views
+│   └── public/
+└── docker-compose.yml        # Orchestration (DB, Keycloak, App)
+```
+
+## 🔒 Authentication Flow
+1. User navigates to the app.
+2. Unauthenticated users are redirected to Keycloak.
+3. User signs in with their credentials.
+4. Keycloak issues a JWT `accessToken`.
+5. Next-Auth secures the token in a session cookies.
+6. The Frontend uses `Bearer <token>` to authenticate requests to the NestJS backend API.
+
+## 📝 License
+This project is proprietary and confidential. Not for external distribution.
+

@@ -1,0 +1,147 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  MECHANIC
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ----------------------------------------------------
+// Core Infrastructure
+// ----------------------------------------------------
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  users     User[]
+  tickets   Ticket[]
+  payments  Payment[]
+  ocrTasks  OcrTask[]
+  auditLogs AuditLog[]
+
+  @@index([deletedAt])
+}
+
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String?
+  password String // Handled securely by SSO, dummy pass locally
+  role     Role    @default(USER)
+  tenantId String? // Optional for SUPER_ADMIN, required for others
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  // Relations
+  tickets   Ticket[]   @relation("CreatorRelation")
+  payments  Payment[]  @relation("UserPayments")
+  ocrTasks  OcrTask[]  @relation("UserOcrTasks")
+  auditLogs AuditLog[] @relation("UserAuditLogs")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([tenantId])
+  @@index([deletedAt])
+}
+
+// ----------------------------------------------------
+// Domains
+// ----------------------------------------------------
+model Ticket {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  status      String @default("OPEN")
+
+  createdBy String
+  creator   User   @relation("CreatorRelation", fields: [createdBy], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft Delete Pattern
+
+  @@index([tenantId, status])
+  @@index([createdBy])
+  @@index([deletedAt])
+}
+
+model Payment {
+  id     String @id @default(uuid())
+  amount Float
+  status String @default("PENDING")
+
+  userId String
+  user   User   @relation("UserPayments", fields: [userId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([tenantId, status])
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model OcrTask {
+  id         String  @id @default(uuid())
+  matricule  String?
+  rawText    String
+  confidence Float?
+
+  userId String
+  user   User   @relation("UserOcrTasks", fields: [userId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+// ----------------------------------------------------
+// Audit & Logs
+// ----------------------------------------------------
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String   // e.g., 'Ticket', 'Payment'
+  entityId  String
+  details   Json?
+
+  userId    String
+  user      User     @relation("UserAuditLogs", fields: [userId], references: [id])
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([entity, entityId])
+}

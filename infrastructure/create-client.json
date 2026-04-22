@@ -1,0 +1,10 @@
+{
+  "clientId": "frontend",
+  "secret": "r1jJ2OQ8qg9qf10hI3I5zK5CjO2tV7Nn",
+  "enabled": true,
+  "clientAuthenticatorType": "client-secret",
+  "redirectUris": ["http://localhost:3000/*", "*", "http://localhost:3000/api/auth/callback/keycloak"],
+  "webOrigins": ["+", "http://localhost:3000"],
+  "directAccessGrantsEnabled": true,
+  "publicClient": false
+}'{ "clientId": "frontend", "secret": "r1jJ2OQ8qg9qf10hI3I5zK5CjO2tV7Nn", "enabled": true, "clientAuthenticatorType": "client-secret", "redirectUris": ["http://localhost:3000/*", "*"], "webOrigins": ["+"], "directAccessGrantsEnabled": true, "publicClient": false }' 
