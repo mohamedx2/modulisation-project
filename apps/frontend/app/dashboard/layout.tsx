@@ -1,26 +1,44 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { useAuth } from "../providers";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Home, FileText, CreditCard, Settings, LogOut, CheckCircle, Smartphone } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { Home, FileText, CreditCard, Settings, LogOut, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SIDEBAR_LINKS = [
-  { href: "/dashboard", label: "Aperçu", icon: Home },
+  { href: "/dashboard", label: "Apercu", icon: Home },
   { href: "/dashboard/tickets", label: "Tickets", icon: FileText },
   { href: "/dashboard/paiment", label: "Paiements", icon: CreditCard },
   { href: "/dashboard/ocr", label: "Scanner Plaque", icon: Smartphone },
-
 ];
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { data: session } = useSession() || {};
+  const router = useRouter();
+  const { user, logout, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [loading, user, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse">Chargement...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      {/* Sidebar Navigation */}
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: 0 }}
@@ -39,6 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             return (
               <Link key={link.href} href={link.href}>
                 <div
+                  aria-current={isActive ? "page" : undefined}
                   className={`group relative flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-[15px] tracking-wide transition-all duration-300 ${
                     isActive
                       ? "bg-foreground text-background shadow-lg"
@@ -66,16 +85,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-6 border-t">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary-foreground">
-              {session?.user?.name?.charAt(0) || "U"}
+              {user?.name?.charAt(0) || "U"}
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm">{session?.user?.name || "Utilisateur"}</span>
-              <span className="text-xs text-muted-foreground truncate max-w-[140px]">{session?.user?.email || "Authentifié"}</span>
+              <span className="font-bold text-sm">{user?.name || "Utilisateur"}</span>
+              <span className="text-xs text-muted-foreground truncate max-w-[140px]">{user?.email || "Authentifie"}</span>
             </div>
           </div>
           <Button
             variant="destructive"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => logout()}
             className="w-full gap-2 font-bold"
           >
             <LogOut className="w-4 h-4" />
@@ -90,7 +109,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {SIDEBAR_LINKS.find((l) => l.href === pathname)?.label || "Tableau de Bord"}
           </h2>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 hover:bg-primary/20">
+            <Button variant="ghost" size="icon" aria-label="Paramètres" className="rounded-full bg-muted/50 hover:bg-primary/20">
               <Settings className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
@@ -111,4 +130,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
     </div>
   );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return <DashboardShell>{children}</DashboardShell>;
 }

@@ -19,7 +19,7 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post()
-  @Roles({ roles: ['realm:user', 'realm:admin'] })
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:default-roles-reno'] })
   create(
     @Body() createTicketDto: CreateTicketDto,
     @AuthenticatedUser() user: KeycloakUser,
@@ -32,19 +32,19 @@ export class TicketsController {
   }
 
   @Get('summary/stats')
-  @Roles({ roles: ['realm:user', 'realm:admin'] })
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:default-roles-reno'] })
   getSummaryStats(@AuthenticatedUser() user: KeycloakUser) {
     return this.ticketsService.getTicketStats(user.tenantId || 'default-tenant-id');
   }
 
   @Get()
-  @Roles({ roles: ['realm:user', 'realm:admin'] })
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:default-roles-reno'] })
   findAll(@AuthenticatedUser() user: KeycloakUser) {
     return this.ticketsService.findAll(user.tenantId || 'default-tenant-id');
   }
 
   @Get(':id')
-  @Roles({ roles: ['realm:user', 'realm:admin'] })
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:default-roles-reno'] })
   findOne(@Param('id') id: string) {
     return this.ticketsService.findOne(id);
   }

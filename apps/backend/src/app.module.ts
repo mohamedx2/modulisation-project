@@ -39,15 +39,18 @@ import { MetricsController } from './core/metrics/metrics.controller';
       synchronize: true,
     }),
     KeycloakConnectModule.register({
-      authServerUrl: process.env.KEYCLOAK_URL || 'http://localhost:8080',
-      realm: process.env.KEYCLOAK_REALM || 'master',
+      authServerUrl: process.env.KEYCLOAK_URL || 'http://keycloak:8080',
+      realm: process.env.KEYCLOAK_REALM || 'reno',
       clientId: process.env.KEYCLOAK_CLIENT_ID || 'backend',
-      secret: process.env.KEYCLOAK_SECRET || 'secret',
+      secret:
+        process.env.KEYCLOAK_CLIENT_SECRET ||
+        'lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6',
       useNestLogger: true,
       verifyTokenAudience: false,
+      cookieKey: 'access_token',
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      tokenValidation: 'online',
+      tokenValidation: 'offline',
     }),
     MailerModule.forRoot({
       transport: {
@@ -68,7 +71,7 @@ import { MetricsController } from './core/metrics/metrics.controller';
       ttl: 60,
     }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 1000 }]),
     OcrModule,
     OtpModule,
     AuthModule,

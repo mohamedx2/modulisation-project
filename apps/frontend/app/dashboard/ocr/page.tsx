@@ -1,14 +1,15 @@
 "use client";
 import { motion } from "framer-motion";
 import { Camera, UploadCloud, CheckCircle2, Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../providers";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function OcrScannerPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,9 +65,7 @@ export default function OcrScannerPage() {
   };
 
   const handleUpload = async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    if (!file || !session?.accessToken) return;
+    if (!file || !user) return;
     setLoading(true);
     setError(null);
     const formData = new FormData();
@@ -75,14 +74,12 @@ export default function OcrScannerPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const res = await fetch(`${apiUrl}/ocr/matricule`, {
         method: "POST",
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        headers: { Authorization: `Bearer ${session.accessToken}` },
+        credentials: "include",
         body: formData,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur de numérisation OCR");
-      setResult(data);
+      setResult(data.data !== undefined ? data.data : data);
     } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       setError(err.message);
     } finally {
@@ -120,6 +117,7 @@ export default function OcrScannerPage() {
                 <h3 className="text-xl font-bold text-center mb-2">Glissez une image ici</h3>
                 <p className="text-muted-foreground font-medium text-center mb-8">ou cliquez pour parcourir vos fichiers (JPG, PNG)</p>
                 <Button 
+                  aria-label="Activer la caméra"
                   onClick={(e) => { e.stopPropagation(); /* Logic for camera  */ }} 
                   size="lg"
                   className="rounded-xl font-bold shadow-lg"
@@ -129,26 +127,25 @@ export default function OcrScannerPage() {
               </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center cursor-default">
-                <img src={preview!} alt="Aperçu" className="w-full h-full object-contain rounded-xl max-h-[300px] shadow-sm mb-6" />
-                <div className="flex flex-wrap items-center justify-center gap-4">
+                <div className="absolute top-4 right-4 flex gap-2">
                   <Button 
-                    variant="outline"
-                    onClick={(e) => { e.stopPropagation(); resetForm(); }}
-                    disabled={loading}
-                    className="rounded-xl font-bold"
+                    aria-label="Refaire une photo"
+                    onClick={(e) => { e.stopPropagation(); resetForm(); }} 
+                    variant="destructive" size="icon" className="rounded-full shadow-lg"
                   >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Changer
-                  </Button>
-                  <Button 
-                    onClick={(e) => { e.stopPropagation(); handleUpload(); }}
-                    disabled={loading}
-                    className="rounded-xl font-bold shadow-lg shadow-primary/20"
-                  >
-                    {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Camera className="w-4 h-4 mr-2" />}
-                    {loading ? 'Analyse en cours...' : 'Lancer l\'analyse'}
+                    <RefreshCw className="w-5 h-5" />
                   </Button>
                 </div>
+                <img src={preview!} alt="Aperçu" className="w-full h-full object-contain rounded-xl max-h-[300px] shadow-sm mb-6" />
+                <Button 
+                  aria-label="Lancer l'analyse OCR"
+                  onClick={(e) => { e.stopPropagation(); handleUpload(); }}
+                  disabled={loading}
+                  className="rounded-xl font-bold shadow-lg shadow-primary/20"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Camera className="w-4 h-4 mr-2" />}
+                  {loading ? 'Analyse en cours...' : 'Lancer l\'analyse'}
+                </Button>
               </div>
             )}
           </CardContent>
@@ -165,7 +162,12 @@ export default function OcrScannerPage() {
               </Alert>
             )}
 
-            {result ? (
+            {loading ? (
+              <div className="w-full max-w-xl mx-auto space-y-4">
+                <Skeleton className="h-8 w-64 mx-auto" />
+                <Skeleton className="h-32 w-full rounded-2xl" />
+              </div>
+            ) : result ? (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col justify-center items-center">
                 <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mb-6 shadow-sm ring-8 ring-green-500/5">
                   <CheckCircle2 className="w-12 h-12 text-green-600" />

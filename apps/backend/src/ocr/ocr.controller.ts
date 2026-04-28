@@ -18,7 +18,7 @@ export class OcrController {
   constructor(private readonly ocrService: OcrService) {}
 
   @Post('matricule')
-  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:mechanic'] })
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:mechanic', 'realm:default-roles-reno'] })
   @UseInterceptors(FileInterceptor('image'))
   async readMatricule(
     @UploadedFile() file: Express.Multer.File,

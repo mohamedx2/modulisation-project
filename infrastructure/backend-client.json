@@ -1,0 +1,8 @@
+{
+  "clientId": "backend",
+  "secret": "lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6",
+  "enabled": true,
+  "clientAuthenticatorType": "client-secret",
+  "publicClient": false,
+  "serviceAccountsEnabled": true
+}

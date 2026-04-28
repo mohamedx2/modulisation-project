@@ -31,6 +31,22 @@ export class PaymentsService {
     });
   }
 
+  async exportCsv(tenantId: string) {
+    const payments = await this.findAll(tenantId);
+    
+    // Define CSV Headers
+    let csv = 'ID,Montant,Status,Email Utilisateur,Date de création\n';
+    
+    // Add rows
+    payments.forEach(payment => {
+      const email = payment.user?.email || 'N/A';
+      const date = payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('fr-FR') : 'N/A';
+      csv += `${payment.id},${payment.amount},${payment.status},${email},${date}\n`;
+    });
+    
+    return csv;
+  }
+
   async findOne(id: string) {
     const payment = await this.prisma.payment.findFirst({
       where: { id, deletedAt: null },

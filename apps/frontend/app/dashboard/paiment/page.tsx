@@ -3,13 +3,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Search, Filter, History, CheckCircle2, DollarSign, Download, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../providers";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/api";
 
 interface Payment {
   id?: string;
@@ -22,26 +25,24 @@ interface Payment {
 }
 
 export default function PaymentsPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPayments() {
-      if (!session?.accessToken) {
+      if (!user) {
          setLoading(false);
          return;
       }
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const res = await fetch(`${apiUrl}/payments`, {
-          headers: { 
-            Authorization: `Bearer ${session.accessToken}` 
-          },
+          credentials: "include",
         });
         if (res.ok) {
-          const data = await res.json();
-          setPayments(data || []);
+          const json = await res.json();
+          setPayments(json.data !== undefined ? json.data : json || []);
         }
       } catch (err) {
         console.error('Failed to fetch payments:', err);
@@ -50,10 +51,10 @@ export default function PaymentsPage() {
       }
     }
     
-    if (session) {
+    if (user) {
       fetchPayments();
     }
-  }, [session]);
+  }, [user]);
 
   const stats = useMemo(() => {
     let CA = 0;
@@ -95,6 +96,30 @@ export default function PaymentsPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      toast.info("Exportation en cours...");
+      const csvData = await fetchWithAuth("/payments/export/csv", {
+        headers: { "Accept": "text/csv" }
+      });
+      
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'factures.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Factures exportées avec succès !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de l'exportation des factures.");
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -103,11 +128,11 @@ export default function PaymentsPage() {
           <p className="mt-2 text-sm text-muted-foreground">Gérez la facturation des interventions et le suivi des encaissements.</p>
         </div>
         <div className="mt-4 sm:mt-0 flex gap-3">
-          <Button variant="outline" className="gap-2 shadow-sm rounded-xl">
+          <Button onClick={handleExport} variant="outline" aria-label="Exporter les paiements" className="gap-2 shadow-sm rounded-xl">
             <Download className="h-4 w-4" />
             Exporter
           </Button>
-          <Button className="gap-2 rounded-xl shadow-lg hover:bg-black transition-all">
+          <Button aria-label="Nouvelle facture" className="gap-2 rounded-xl shadow-lg hover:bg-black transition-all">
             <Plus className="h-4 w-4" />
             Nouvelle Facture
           </Button>
@@ -148,7 +173,7 @@ export default function PaymentsPage() {
                 className="pl-8 bg-background rounded-lg border-border/50"
               />
             </div>
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+            <Button variant="ghost" size="sm" aria-label="Filtres avancés" className="gap-2 text-muted-foreground">
               <Filter className="w-4 h-4" /> Plus de filtres
             </Button>
           </div>
@@ -167,13 +192,16 @@ export default function PaymentsPage() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      <div className="flex justify-center items-center text-muted-foreground">
-                        <Loader2 className="h-6 w-6 animate-spin mr-2" /> Chargement des données...
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
                 ) : payments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center text-muted-foreground font-medium">

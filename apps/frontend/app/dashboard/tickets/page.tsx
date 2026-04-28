@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { fetchWithAuth } from "@/lib/api";
+import { toast } from "sonner";
 
 const SERVICES = [
   { id: 1, title: "Diagnostic Rapide", desc: "Analyse des codes erreurs ODB-II", icon: Target, price: "45 €" },
@@ -25,16 +26,13 @@ export default function ReservationPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [selectedService, setSelectedService] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
   const handleBack = () => {
-    setErrorMsg("");
     setStep((s) => Math.max(1, s - 1));
   };
 
   const requestOtp = async () => {
     setIsLoading(true);
-    setErrorMsg("");
     try {
       const res = await fetchWithAuth("/otp/send", {
         method: "POST",
@@ -43,11 +41,11 @@ export default function ReservationPage() {
       if (res?.success || res?.data?.success) {
         setStep(2);
       } else {
-        setErrorMsg("Erreur lors de l'envoi du code. Veuillez réessayer.");
+        toast.error("Erreur lors de l'envoi du code. Veuillez réessayer.");
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg("Erreur serveur lors de l'envoi de l'OTP.");
+      toast.error("Erreur serveur lors de l'envoi de l'OTP.");
     } finally {
       setIsLoading(false);
     }
@@ -55,22 +53,21 @@ export default function ReservationPage() {
 
   const verifyOtp = async () => {
     setIsLoading(true);
-    setErrorMsg("");
     try {
       const code = otp.join("");
       const res = await fetchWithAuth("/otp/verify", {
         method: "POST",
         body: JSON.stringify({ email, code })
       });
-      
+
       if (res?.valid || res?.data?.valid) {
         setStep(3);
       } else {
-        setErrorMsg("Code de vérification invalide ou expiré.");
+        toast.error("Code de vérification invalide ou expiré.");
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg("Erreur lors de la vérification de l'OTP.");
+      toast.error("Erreur lors de la vérification de l'OTP.");
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +75,6 @@ export default function ReservationPage() {
 
   const submitReservation = async () => {
     setIsLoading(true);
-    setErrorMsg("");
     try {
       const service = SERVICES.find(s => s.id === selectedService);
       const titleStr = `${vehicle} - ${service?.title}`;
@@ -91,8 +87,8 @@ export default function ReservationPage() {
           description: descStr
         })
       });
-      
-      alert("Réservation confirmée et ticket créé avec succès !");
+
+      toast.success("Réservation confirmée et ticket créé avec succès !");
       setStep(1);
       setVehicle("");
       setEmail("");
@@ -100,7 +96,7 @@ export default function ReservationPage() {
       setSelectedService(null);
     } catch (err) {
       console.error(err);
-      setErrorMsg("Erreur lors de la création du ticket.");
+      toast.error("Erreur lors de la création du ticket.");
     } finally {
       setIsLoading(false);
     }
@@ -111,20 +107,20 @@ export default function ReservationPage() {
       <div className="mb-12">
         <h1 className="text-3xl font-black tracking-tight text-center">Réservation d&apos;Intervention</h1>
         <p className="text-muted-foreground text-center mt-2">Réservez un service pour votre véhicule en quelques étapes simples.</p>
-        
+
         <div className="flex items-center justify-center mt-8 relative max-w-sm mx-auto">
           <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 -z-10 rounded-full" />
-          <div 
+          <div
             className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 -z-10 rounded-full transition-all duration-500"
             style={{ width: `${((step - 1) / 2) * 100}%` }}
           />
           {[1, 2, 3].map((s) => (
-             <div 
-               key={s} 
-               className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 border-background shadow-sm transition-colors ${s <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-             >
-                {s < step ? <CheckCircle2 className="w-5 h-5" /> : s}
-             </div>
+            <div
+              key={s}
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 border-background shadow-sm transition-colors ${s <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              {s < step ? <CheckCircle2 className="w-5 h-5" /> : s}
+            </div>
           ))}
         </div>
       </div>
@@ -145,31 +141,31 @@ export default function ReservationPage() {
                   </div>
                   <h2 className="text-2xl font-bold">Informations Véhicule</h2>
                 </div>
-                
+
                 <div className="space-y-6 max-w-md mx-auto">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-muted-foreground">Plaque d&apos;immatriculation</label>
-                    <Input 
-                      placeholder="EX-123-AM" 
+                    <label htmlFor="vehicle" className="text-sm font-semibold text-muted-foreground cursor-pointer">Plaque d&apos;immatriculation</label>
+                    <Input
+                      id="vehicle"
+                      placeholder="EX-123-AM"
                       className="text-lg uppercase"
                       value={vehicle}
                       onChange={(e) => setVehicle(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-muted-foreground">Adresse Email</label>
-                    <Input 
+                    <label htmlFor="email" className="text-sm font-semibold text-muted-foreground cursor-pointer">Adresse Email</label>
+                    <Input
+                      id="email"
                       type="email"
-                      placeholder="client@macopilote.fr" 
+                      placeholder="client@macopilote.fr"
                       className="text-lg"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
 
-                  {errorMsg && <p className="text-destructive text-sm font-bold text-center">{errorMsg}</p>}
-                  
-                  <Button 
+                  <Button
                     onClick={requestOtp}
                     disabled={!vehicle || !email || isLoading}
                     className="w-full h-12 text-base font-bold rounded-xl mt-4"
@@ -195,7 +191,7 @@ export default function ReservationPage() {
                 <Button variant="ghost" onClick={handleBack} disabled={isLoading} className="mb-6 -ml-4">
                   <ArrowLeft className="w-4 h-4 mr-2" /> Retour
                 </Button>
-                
+
                 <div className="flex flex-col items-center text-center space-y-6 mb-12">
                   <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
                     <ShieldCheck className="w-10 h-10" />
@@ -230,10 +226,8 @@ export default function ReservationPage() {
                   ))}
                 </div>
 
-                {errorMsg && <p className="text-destructive text-sm font-bold text-center mb-6">{errorMsg}</p>}
-
                 <div className="flex flex-col items-center space-y-6">
-                  <Button 
+                  <Button
                     onClick={verifyOtp}
                     disabled={isLoading || otp.some(d => d === "")}
                     size="lg"
@@ -242,7 +236,7 @@ export default function ReservationPage() {
                     {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Valider l'identité"}
                     {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
                   </Button>
-                  
+
                   <Button variant="ghost" onClick={requestOtp} disabled={isLoading} className="text-muted-foreground hover:text-primary font-bold">
                     <Mail className="w-4 h-4 mr-2" />
                     Renvoyer le code
@@ -261,17 +255,17 @@ export default function ReservationPage() {
             exit={{ opacity: 0, x: -20 }}
           >
             <div className="mb-8 flex items-center justify-between">
-               <Button variant="ghost" onClick={handleBack} disabled={isLoading}>
-                  <ArrowLeft className="w-4 h-4 mr-2" /> Retour
-               </Button>
-               <div className="text-sm font-semibold bg-muted py-1 px-3 rounded-full">
-                 Véhicule: <span className="font-bold uppercase text-primary">{vehicle}</span>
-               </div>
+              <Button variant="ghost" onClick={handleBack} disabled={isLoading}>
+                <ArrowLeft className="w-4 h-4 mr-2" /> Retour
+              </Button>
+              <div className="text-sm font-semibold bg-muted py-1 px-3 rounded-full">
+                Véhicule: <span className="font-bold uppercase text-primary">{vehicle}</span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {SERVICES.map((srv) => (
-                <Card 
+                <Card
                   key={srv.id}
                   onClick={() => !isLoading && setSelectedService(srv.id)}
                   className={`cursor-pointer rounded-2xl relative overflow-hidden transition-all border-2 ${selectedService === srv.id ? "border-primary shadow-lg ring-4 ring-primary/10" : "border-border hover:border-foreground/20 hover:shadow-md"}`}
@@ -289,7 +283,7 @@ export default function ReservationPage() {
                         </Badge>
                       </div>
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedService === srv.id ? "border-primary bg-primary" : "border-muted-foreground"}`}>
-                          {selectedService === srv.id && <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />}
+                        {selectedService === srv.id && <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />}
                       </div>
                     </div>
                   </CardContent>
@@ -297,17 +291,15 @@ export default function ReservationPage() {
               ))}
             </div>
 
-            {errorMsg && <p className="text-destructive text-sm font-bold text-center mt-6">{errorMsg}</p>}
-
             <div className="flex justify-end mt-8">
-              <Button 
-                  disabled={!selectedService || isLoading}
-                  onClick={submitReservation}
-                  size="lg"
-                  className="rounded-xl font-bold h-12 px-8 shadow-lg w-full sm:w-auto"
-                >
-                  {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Confirmer la réservation"}
-                  {!isLoading && <CheckCircle2 className="w-5 h-5 ml-2" />}
+              <Button
+                disabled={!selectedService || isLoading}
+                onClick={submitReservation}
+                size="lg"
+                className="rounded-xl font-bold h-12 px-8 shadow-lg w-full sm:w-auto"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Confirmer la réservation"}
+                {!isLoading && <CheckCircle2 className="w-5 h-5 ml-2" />}
               </Button>
             </div>
           </motion.div>

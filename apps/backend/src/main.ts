@@ -5,12 +5,14 @@ import helmet from 'helmet';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 import { TimeoutInterceptor } from './core/interceptors/timeout.interceptor';
 import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // 1. Security: Set HTTP Headers
   app.use(helmet());
+  app.use(cookieParser());
 
   // 2. Validation: Enforce clean DTOs & strict payloads
   app.useGlobalPipes(

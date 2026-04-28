@@ -1,0 +1,79 @@
+{
+  "realm": "reno",
+  "enabled": true,
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "backend",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "300",
+        "client.secret.creation.time": "1704067200"
+      }
+    },
+    {
+      "clientId": "frontend",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "r1jJ2OQ8qg9qf10hI3I5zK5CjO2tV7Nn",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://frontend:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://frontend:3000"
+      ],
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "testadmin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "testadmin@reno.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Admin role"
+      },
+      {
+        "name": "user",
+        "description": "User role"
+      }
+    ]
+  }
+}

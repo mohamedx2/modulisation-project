@@ -8,7 +8,7 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('stats')
-  @Roles({ roles: ['realm:user', 'realm:admin'] })
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:default-roles-reno'] })
   getStats(@AuthenticatedUser() user: KeycloakUser) {
     return this.dashboardService.getStats(user.tenantId || 'default-tenant-id');
   }
