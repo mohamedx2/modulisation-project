@@ -49,4 +49,16 @@ export class OcrController {
       );
     }
   }
+
+  @Post('carte-grise')
+  @Roles({ roles: ['realm:user', 'realm:admin', 'realm:mechanic', 'realm:default-roles-reno'] })
+  @UseInterceptors(FileInterceptor('image'))
+  async readCarteGrise(
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new HttpException('No image provided', HttpStatus.BAD_REQUEST);
+    }
+    return this.ocrService.extractVehicleInfo(file.buffer);
+  }
 }

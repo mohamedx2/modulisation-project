@@ -15,8 +15,13 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   });
 
   if (!response.ok) {
-    console.error('API error:', response.status);
-    throw new Error(`API error: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.message || `API error: ${response.status}`;
+    console.error('API error:', response.status, message);
+    const error = new Error(Array.isArray(message) ? message[0] : message);
+    (error as any).statusCode = response.status;
+    (error as any).data = errorData;
+    throw error;
   }
 
   if (options.headers && new Headers(options.headers).get('Accept') === 'text/csv') {

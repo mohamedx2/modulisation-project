@@ -49,6 +49,29 @@ async function main() {
   });
 
   console.log(`Created Mechanic User: ${mechanic.email}`);
+  
+  // Create sample vehicles for the tenant
+  console.log('Seeding vehicles...');
+  await prisma.vehicle.createMany({
+    data: [
+      {
+        name: 'Renault Clio V',
+        plate: 'TUN 9999',
+        img: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c15d?q=80&w=600&auto=format&fit=crop',
+        lastService: '12 OCT 2023',
+        health: 75,
+        tenantId: tenant.id,
+      },
+      {
+        name: 'Renault Megane E-Tech',
+        plate: 'TUN 8888',
+        img: 'https://images.unsplash.com/photo-1621348160394-11180c7d4858?q=80&w=600&auto=format&fit=crop',
+        lastService: '05 JAN 2024',
+        health: 25,
+        tenantId: tenant.id,
+      },
+    ],
+  });
 
   console.log('Seeding finished.');
 }

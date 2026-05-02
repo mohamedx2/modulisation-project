@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Filter, History, CheckCircle2, DollarSign, Download, Loader2, Car, Calendar, ArrowRight, Settings, Info, MapPin, Activity } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../providers";
 import { fetchWithAuth } from "@/lib/api";
 
@@ -13,17 +14,23 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardOverview() {
+  const router = useRouter();
   const { user, loading } = useAuth();
   const [stats, setStats] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       if (!user) return;
       try {
-        const statsData = await fetchWithAuth("/dashboard/stats");
-        // Stats are returned wrapped in { data: [...] }
+        const [statsData, vehiclesData] = await Promise.all([
+          fetchWithAuth("/dashboard/stats"),
+          fetchWithAuth("/dashboard/vehicles")
+        ]);
+        
         setStats(statsData.data || statsData);
+        setVehicles(vehiclesData.data || vehiclesData);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
@@ -61,7 +68,10 @@ export default function DashboardOverview() {
           <section className="space-y-6">
             <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Actions Rapides</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-primary border-none p-6 flex flex-col justify-between h-40 cursor-pointer hover:shadow-lg transition-all group">
+              <Card 
+                onClick={() => router.push("/dashboard/tickets")}
+                className="bg-primary border-none p-6 flex flex-col justify-between h-40 cursor-pointer hover:shadow-lg transition-all group"
+              >
                  <div className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center">
                     <Plus className="w-6 h-6 text-black" />
                  </div>
@@ -70,13 +80,19 @@ export default function DashboardOverview() {
                     <p className="text-black/60 text-xs font-bold uppercase tracking-tighter">RÉSERVEZ EN 1 MINUTE</p>
                  </div>
               </Card>
-              <Card className="bg-muted/50 border-none p-6 flex flex-col justify-between h-40 cursor-pointer hover:bg-muted transition-all">
+              <Card 
+                onClick={() => router.push("/dashboard/my-rdv")}
+                className="bg-muted/50 border-none p-6 flex flex-col justify-between h-40 cursor-pointer hover:bg-muted transition-all"
+              >
                  <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-black" />
                  </div>
                  <h3 className="font-black text-black text-lg uppercase">Mes RDVs</h3>
               </Card>
-              <Card className="bg-muted/50 border-none p-6 flex flex-col justify-between h-40 cursor-pointer hover:bg-muted transition-all">
+              <Card 
+                onClick={() => router.push("/dashboard/history")}
+                className="bg-muted/50 border-none p-6 flex flex-col justify-between h-40 cursor-pointer hover:bg-muted transition-all"
+              >
                  <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center">
                     <History className="w-5 h-5 text-black" />
                  </div>
@@ -89,17 +105,19 @@ export default function DashboardOverview() {
           <section className="space-y-6">
             <div className="flex items-center justify-between border-l-4 border-primary pl-4">
               <h2 className="text-2xl font-black uppercase tracking-tighter">MES VÉHICULES</h2>
-              <Button variant="link" className="text-primary font-bold text-xs uppercase tracking-widest">Voir tout le parc</Button>
+              <Button 
+                onClick={() => router.push("/dashboard/vehicles/add")}
+                className="rounded-xl font-black uppercase italic tracking-tight h-10 px-6 shadow-lg shadow-primary/20"
+              >
+                <Car className="w-4 h-4 mr-2" /> Ajouter
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { name: "Renault Clio V", plate: "TUN 9999", date: "12 OCT 2023", img: "https://images.unsplash.com/photo-1603811463133-7227e85749ba?q=80&w=600&auto=format&fit=crop", health: 75 },
-                { name: "Renault Megane E-Tech", plate: "TUN 8888", date: "05 JAN 2024", img: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?q=80&w=600&auto=format&fit=crop", health: 25 }
-              ].map((vehicle, idx) => (
-                <Card key={idx} className="overflow-hidden border-none shadow-sm group cursor-pointer hover:shadow-xl transition-all rounded-[2rem]">
+              {vehicles.map((vehicle, idx) => (
+                <Card key={vehicle.id || idx} className="overflow-hidden border-none shadow-sm group cursor-pointer hover:shadow-xl transition-all rounded-[2rem]">
                    <div className="relative aspect-video overflow-hidden">
-                      <img src={vehicle.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <img src={vehicle.img || "https://images.unsplash.com/photo-1541899481282-d53bffe3c15d?q=80&w=600&auto=format&fit=crop"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                       <div className="absolute top-4 right-4">
                         <Badge className="bg-black/80 backdrop-blur-md text-white border-none font-bold px-3 py-1">{vehicle.plate}</Badge>
                       </div>
@@ -110,7 +128,7 @@ export default function DashboardOverview() {
                             <h3 className="text-xl font-black">{vehicle.name}</h3>
                             <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase mt-1">
                                <Calendar className="w-3 h-3" />
-                               DERNIER ENTRETIEN: {vehicle.date}
+                               DERNIER ENTRETIEN: {vehicle.lastService || vehicle.date || "N/A"}
                             </div>
                          </div>
                       </div>

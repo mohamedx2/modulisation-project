@@ -29,10 +29,17 @@ export class OtpService {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Your Password Reset OTP',
+        subject: 'Votre Code de Vérification Renault',
         // For production, use templates. We just send raw OTP here.
-        text: `Your reset code is: ${code}. It expires in 5 minutes.`,
-        html: `<h2>Password Reset</h2><p>Your OTP code is <b style="color:red; font-size:24px;">${code}</b></p>`,
+        text: `Votre code de vérification est : ${code}. Il expire dans 5 minutes.`,
+        html: `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #FFCC00;">Vérification Renault Axis</h2>
+                <p>Votre code de vérification pour votre réservation est :</p>
+                <div style="background: #f4f4f4; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 5px;">
+                  ${code}
+                </div>
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">Ce code expire dans 5 minutes.</p>
+               </div>`,
       });
       this.logger.log(`Sent OTP to ${email}`);
       return true;

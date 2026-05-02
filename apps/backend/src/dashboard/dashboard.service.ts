@@ -25,4 +25,21 @@ export class DashboardService {
       { name: 'System Health', value: '98.9%', iconType: 'Activity', change: '+1.2%', changeType: 'positive' },
     ];
   }
+
+  async getVehicles(tenantId: string) {
+    return this.prisma.vehicle.findMany({
+      where: { tenantId, deletedAt: null },
+    });
+  }
+
+  async createVehicle(tenantId: string, data: { name: string, plate: string, img?: string }) {
+    return this.prisma.vehicle.create({
+      data: {
+        ...data,
+        tenantId,
+        health: 100,
+        lastService: 'À l\'instant',
+      },
+    });
+  }
 }

@@ -4,14 +4,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Home, FileText, CreditCard, Settings, LogOut, Smartphone } from "lucide-react";
+import { Home, FileText, CreditCard, Settings, LogOut, Smartphone, Calendar, History, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SIDEBAR_LINKS = [
-  { href: "/dashboard", label: "Apercu", icon: Home },
-  { href: "/dashboard/tickets", label: "Tickets", icon: FileText },
-  { href: "/dashboard/paiment", label: "Paiements", icon: CreditCard },
-  { href: "/dashboard/ocr", label: "Scanner Plaque", icon: Smartphone },
+  { href: "/dashboard", label: "Aperçu", icon: Home },
+  { href: "/dashboard/my-rdv", label: "Mes RDVs", icon: Calendar },
+  { href: "/dashboard/tickets", label: "Nouveau RDV", icon: PlusCircle },
+  { href: "/dashboard/history", label: "Historique", icon: History },
+  { href: "/dashboard/ocr", label: "Scanner", icon: Smartphone },
 ];
 
 function DashboardShell({ children }: { children: React.ReactNode }) {

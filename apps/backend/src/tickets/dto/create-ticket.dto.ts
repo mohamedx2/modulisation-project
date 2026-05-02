@@ -12,4 +12,12 @@ export class CreateTicketDto {
   @IsString()
   @IsOptional()
   tenantId?: string;
+
+  @IsString()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  scheduledAt?: string;
 }
