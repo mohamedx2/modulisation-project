@@ -1299,7 +1299,7 @@ model web_origins {
 model Vehicle {
   id          String    @id @default(uuid())
   name        String
-  plate       String
+  plate       String    @unique
   img         String?
   imageData   Bytes?
   lastService String?
