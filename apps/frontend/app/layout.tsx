@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 export const metadata = {
-  title: "Modulisation Project",
-  description: "Enterprise modulisation platform",
+  title: "RENAULT AXIS | Industrial Intelligence",
+  description: "Plateforme unifiée de gestion technique et automatisation Renault.",
   icons: {
     icon: "/favicon.svg",
   },

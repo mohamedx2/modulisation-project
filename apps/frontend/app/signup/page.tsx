@@ -1,14 +1,17 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Lock, User, Mail, ShieldCheck, CheckCircle2, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowLeft, Lock, User, Mail, ShieldCheck, CheckCircle2, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -26,212 +29,198 @@ export default function SignupPage() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     // Simulate backend API call
     setTimeout(() => {
+      setIsLoading(false);
       setStep(3); // Success step
-    }, 800);
-  };
-
-  const slideVariants = {
-    hidden: { opacity: 0, x: 30 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-    exit: { opacity: 0, x: -30, transition: { duration: 0.3, ease: "easeIn" as const } },
+    }, 1500);
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-[#fcf9f8] relative overflow-hidden font-sans">
-      {/* Visual Column - Left */}
-      <div className="hidden lg:flex w-[45%] relative items-end justify-start bg-[#1c1b1b] overflow-hidden">
-        <div className="absolute inset-0 w-full h-full opacity-60 mix-blend-overlay bg-black">
-          <div className="absolute inset-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_#f5c800_0%,_transparent_60%)] opacity-20 animate-pulse" />
-          <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_bottom,#1c1b1b_0%,transparent_50%,#1c1b1b_100%)]" />
-        </div>
-        
-        <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#fcf9f8] to-transparent z-10" />
-        
-        <div className="relative z-20 flex flex-col justify-between h-full w-full p-16">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#f5c800] rounded-xl flex items-center justify-center shadow-lg shadow-[#f5c800]/20">
-              <ShieldCheck className="w-6 h-6 text-[#1c1b1b]" />
-            </div>
-            <h1 className="font-black italic text-3xl tracking-tighter text-white">
-              REN<span className="text-[#f5c800]">AULT</span> AXIS
-            </h1>
-          </div>
-          
-          <div className="max-w-lg mb-12">
-            <h2 className="text-5xl font-black text-white leading-[1.1] tracking-tight mb-6">
-              Rejoignez le <br/><span className="text-[#f5c800]">SaaS Pro</span>
-            </h2>
-            <p className="text-[#a1a1aa] font-medium text-xl leading-relaxed">
-              Ouvrez votre compte pour profiter de notre architecture modulée, du traitement OCR et des capacités cloud natives.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen w-full relative flex items-center justify-center p-6 bg-black selection:bg-primary selection:text-black overflow-hidden font-sans">
+      
+      {/* Background Elements */}
+      <div className="absolute inset-0 mesh-gradient opacity-40 z-0" />
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -ml-64 -mt-64 z-0 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -mr-32 -mb-32 z-0 pointer-events-none" />
 
-      {/* Form Column - Right */}
-      <div className="flex flex-1 items-center justify-center p-8 lg:p-24 relative z-20">
-        <div className="w-full max-w-md">
-          {/* Progress Indicators */}
-          {step < 3 && (
-            <div className="flex items-center gap-2 mb-10 w-full">
-              <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? "bg-[#f5c800]" : "bg-black/10"} transition-colors duration-500`} />
-              <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? "bg-[#f5c800]" : "bg-black/10"} transition-colors duration-500`} />
-            </div>
-          )}
-
-          <AnimatePresence mode="wait" initial={false}>
-            {step === 1 && (
-              <motion.div 
-                key="step1"
-                variants={slideVariants}
-                initial="hidden" animate="visible" exit="exit"
-                className="flex flex-col gap-8"
-              >
-                <div>
-                  <h2 className="text-4xl font-black text-[#1c1b1b] tracking-tight mb-3">Créer un compte</h2>
-                  <p className="text-[#71717a] font-medium text-lg">Parlez-nous un peu de vous.</p>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-lg relative z-10"
+      >
+        <Card className="rounded-[3rem] border-white/10 bg-white/[0.03] backdrop-blur-3xl shadow-2xl overflow-hidden relative group">
+          <CardContent className="p-12 sm:p-16">
+            
+            {/* Header */}
+            {step < 3 && (
+              <div className="flex flex-col items-center text-center space-y-6 mb-12">
+                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-[0_20px_40px_rgba(255,203,5,0.2)]">
+                  <ShieldCheck className="w-8 h-8 text-black" />
+                </div>
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white leading-none">
+                    CREER UN <span className="text-primary">PROFIL</span>
+                  </h1>
+                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40">Step {step} of 2 — Identity Registration</p>
                 </div>
                 
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="font-bold text-sm tracking-wide uppercase text-[#a1a1aa]">Prénom</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a1a1aa]" />
-                      <input 
-                        type="text" 
-                        value={formData.prenom}
-                        onChange={(e) => setFormData({...formData, prenom: e.target.value})}
-                        className="w-full bg-white border border-black/10 rounded-xl px-12 py-4 font-bold text-[#1c1b1b] focus:ring-2 focus:ring-[#f5c800]/30 focus:border-[#f5c800] transition-all outline-none shadow-sm"
-                        placeholder="Ex: Jean"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="font-bold text-sm tracking-wide uppercase text-[#a1a1aa]">Nom de famille</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a1a1aa]" />
-                      <input 
-                        type="text" 
-                        value={formData.nom}
-                        onChange={(e) => setFormData({...formData, nom: e.target.value})}
-                        className="w-full bg-white border border-black/10 rounded-xl px-12 py-4 font-bold text-[#1c1b1b] focus:ring-2 focus:ring-[#f5c800]/30 focus:border-[#f5c800] transition-all outline-none shadow-sm"
-                        placeholder="Ex: Dupont"
-                      />
-                    </div>
-                  </div>
+                {/* Progress Bar */}
+                <div className="flex gap-2 w-full max-w-[200px] mt-4">
+                  <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 1 ? "bg-primary" : "bg-white/10"}`} />
+                  <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 2 ? "bg-primary" : "bg-white/10"}`} />
                 </div>
-
-                <button 
-                  onClick={nextStep}
-                  disabled={!formData.nom || !formData.prenom}
-                  className="w-full mt-2 bg-[#1c1b1b] hover:bg-black disabled:bg-[#1c1b1b]/50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all shadow-xl shadow-black/[0.04]"
-                >
-                  Continuer <ArrowRight className="w-5 h-5" />
-                </button>
-              </motion.div>
+              </div>
             )}
 
-            {step === 2 && (
-              <motion.div 
-                key="step2"
-                variants={slideVariants}
-                initial="hidden" animate="visible" exit="exit"
-                className="flex flex-col gap-8"
-              >
-                <div>
-                  <button onClick={prevStep} className="flex items-center gap-2 text-sm font-bold text-[#a1a1aa] hover:text-[#1c1b1b] transition-colors mb-6">
-                    <ArrowLeft className="w-4 h-4" /> Retour
-                  </button>
-                  <h2 className="text-4xl font-black text-[#1c1b1b] tracking-tight mb-3">Sécuriser le compte</h2>
-                  <p className="text-[#71717a] font-medium text-lg">Définissez vos identifiants d&apos;accès.</p>
-                </div>
-                
-                <form onSubmit={handleRegister} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="font-bold text-sm tracking-wide uppercase text-[#a1a1aa]">Adresse Email Professionnelle</label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a1a1aa]" />
-                      <input 
-                        type="email" 
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="w-full bg-white border border-black/10 rounded-xl px-12 py-4 font-bold text-[#1c1b1b] focus:ring-2 focus:ring-[#f5c800]/30 focus:border-[#f5c800] transition-all outline-none shadow-sm"
-                        placeholder="jean.dupont@entreprise.com"
-                        required
-                      />
+            <AnimatePresence mode="wait">
+              {step === 1 && (
+                <motion.div 
+                  key="step1"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-8"
+                >
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Prénom</label>
+                      <div className="relative">
+                        <User className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                        <Input 
+                          placeholder="EX: JEAN"
+                          className="h-16 pl-16 rounded-2xl bg-white/5 border-white/10 text-white font-bold placeholder:text-white/10 focus-visible:ring-primary uppercase"
+                          value={formData.prenom}
+                          onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="font-bold text-sm tracking-wide uppercase text-[#a1a1aa]">Mot de passe (Min. 8 caractères)</label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a1a1aa]" />
-                      <input 
-                        type="password" 
-                        value={formData.password}
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                        className="w-full bg-white border border-black/10 rounded-xl px-12 py-4 font-bold text-[#1c1b1b] focus:ring-2 focus:ring-[#f5c800]/30 focus:border-[#f5c800] transition-all outline-none shadow-sm"
-                        placeholder="••••••••"
-                        required
-                        minLength={8}
-                      />
+                    
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Nom de famille</label>
+                      <div className="relative">
+                        <User className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                        <Input 
+                          placeholder="EX: DUPONT"
+                          className="h-16 pl-16 rounded-2xl bg-white/5 border-white/10 text-white font-bold placeholder:text-white/10 focus-visible:ring-primary uppercase"
+                          value={formData.nom}
+                          onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <button 
-                    type="submit"
-                    disabled={!formData.email || formData.password.length < 8}
-                    className="w-full mt-4 bg-[#f5c800] hover:bg-[#e0b700] disabled:bg-[#f5c800]/50 disabled:cursor-not-allowed text-[#1c1b1b] py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-xl shadow-[#f5c800]/20"
+                  <Button 
+                    onClick={nextStep}
+                    disabled={!formData.nom || !formData.prenom}
+                    className="w-full h-18 text-xl font-black uppercase italic tracking-tight rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
-                    Valider l&apos;inscription <CheckCircle2 className="w-5 h-5" />
-                  </button>
-                </form>
-              </motion.div>
-            )}
+                    Continuer <ArrowRight className="w-7 h-7 ml-3" />
+                  </Button>
+                </motion.div>
+              )}
 
-            {step === 3 && (
-              <motion.div 
-                key="step3"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1, transition: { type: "spring", bounce: 0.5, duration: 0.6 } }}
-                className="flex flex-col items-center justify-center text-center gap-6 py-12"
-              >
-                <div className="w-24 h-24 rounded-full bg-[#f5c800]/20 flex items-center justify-center relative mb-4">
-                  <div className="absolute inset-0 bg-[#f5c800] rounded-full animate-ping opacity-20" />
-                  <CheckCircle2 className="w-12 h-12 text-[#1c1b1b]" />
-                </div>
-                
-                <div>
-                  <h2 className="text-4xl font-black text-[#1c1b1b] tracking-tight mb-4">Compte créé !</h2>
-                  <p className="text-[#71717a] font-medium text-lg leading-relaxed max-w-sm">
-                    Votre espace personnel a été généré avec succès. Vous pouvez maintenant vous connecter.
-                  </p>
-                </div>
-
-                <button 
-                  onClick={() => router.push("/login")}
-                  className="w-full mt-6 bg-[#1c1b1b] hover:bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-colors shadow-2xl"
+              {step === 2 && (
+                <motion.div 
+                  key="step2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-8"
                 >
-                  Aller à la connexion <ChevronRight className="w-5 h-5" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Email Professionnel</label>
+                      <div className="relative">
+                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                        <Input 
+                          type="email"
+                          placeholder="NOM.PRENOM@RENAULT.COM"
+                          className="h-16 pl-16 rounded-2xl bg-white/5 border-white/10 text-white font-bold placeholder:text-white/10 focus-visible:ring-primary uppercase"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Mot de passe</label>
+                      <div className="relative">
+                        <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                        <Input 
+                          type="password"
+                          placeholder="••••••••"
+                          className="h-16 pl-16 rounded-2xl bg-white/5 border-white/10 text-white font-bold placeholder:text-white/10 focus-visible:ring-primary"
+                          value={formData.password}
+                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-          {/* Links Footer */}
-          {step < 3 && (
-            <div className="pt-8 mt-8 border-t border-black/5 flex items-center justify-center gap-2">
-              <span className="font-medium text-[#71717a] text-sm">Vous avez déjà un compte ?</span>
-              <Link href="/login" className="font-bold text-[#1c1b1b] text-sm hover:text-[#f5c800] transition-colors">
-                Connectez-vous
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
+                  <div className="flex flex-col gap-4">
+                    <Button 
+                      onClick={handleRegister}
+                      disabled={!formData.email || formData.password.length < 8 || isLoading}
+                      className="w-full h-18 text-xl font-black uppercase italic tracking-tight rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      {isLoading ? <Loader2 className="w-7 h-7 animate-spin" /> : <>Finaliser <CheckCircle2 className="w-7 h-7 ml-3" /></>}
+                    </Button>
+                    <Button variant="ghost" onClick={prevStep} className="font-black uppercase tracking-widest text-[10px] text-white/40 hover:text-white transition-colors">
+                      <ArrowLeft className="w-4 h-4 mr-2" /> Revenir en arrière
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {step === 3 && (
+                <motion.div 
+                  key="step3"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center text-center space-y-10 py-8"
+                >
+                  <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-10" />
+                    <CheckCircle2 className="w-16 h-16 text-primary" />
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter">Bienvenue !</h2>
+                    <p className="text-white/40 font-bold leading-relaxed max-w-sm">
+                      Votre compte technique a été provisionné avec succès sur l'infrastructure Renault Axis.
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={() => router.push("/login")}
+                    className="w-full h-18 text-xl font-black uppercase italic tracking-tight rounded-2xl shadow-2xl"
+                  >
+                    Se connecter <ChevronRight className="w-7 h-7 ml-2" />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {step < 3 && (
+              <div className="pt-8 mt-12 border-t border-white/5 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Déjà membre ? <Link href="/login" className="text-primary hover:underline underline-offset-4 ml-2">Connexion</Link>
+                </p>
+              </div>
+            )}
+          </CardContent>
+
+          {/* Decorative stripes */}
+          <div className="absolute top-0 right-0 w-24 h-full flex gap-1 opacity-[0.03] rotate-12 -mr-8 pointer-events-none group-hover:opacity-[0.08] transition-opacity">
+             <div className="w-4 h-full bg-primary" />
+             <div className="w-2 h-full bg-primary" />
+             <div className="w-8 h-full bg-primary" />
+          </div>
+        </Card>
+      </motion.div>
     </div>
   );
 }

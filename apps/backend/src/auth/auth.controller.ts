@@ -30,32 +30,41 @@ export class AuthController {
   @Get('session')
   async getSession(@Req() req: Request, @Res() res: Response) {
     const accessToken = req.cookies?.access_token;
+    const userId = req.cookies?.user_id;
 
-    if (!accessToken) {
+    if (!accessToken && !userId) {
       return res.status(200).json({ authenticated: false });
     }
 
-    try {
-      // Decode JWT payload (issued by our Keycloak instance)
-      const parts = accessToken.split('.');
-      if (parts.length !== 3) {
-        return res.status(200).json({ authenticated: false });
-      }
-      const payload = JSON.parse(
-        Buffer.from(parts[1], 'base64url').toString('utf-8'),
-      );
+    if (accessToken) {
+      try {
+        const parts = accessToken.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(
+            Buffer.from(parts[1], 'base64url').toString('utf-8'),
+          );
 
-      // Check token expiry
-      if (!payload.exp || payload.exp < Date.now() / 1000) {
-        return res.status(200).json({ authenticated: false });
+          if (payload.exp && payload.exp > Date.now() / 1000) {
+            const user = await this.authService.getOrCreateFromJwt(payload, res);
+            return res.json({ authenticated: true, user });
+          }
+        }
+      } catch (e) {
+        console.error('Session JWT validation failed:', e.message);
       }
-
-      // Get or create the user in DB from JWT claims
-      const user = await this.authService.getOrCreateFromJwt(payload, res);
-      return res.json({ authenticated: true, user });
-    } catch {
-      return res.status(200).json({ authenticated: false });
     }
+
+    // Fallback: Check for local session via user_id cookie
+    if (userId) {
+      try {
+        const user = await this.authService.getProfile(userId);
+        return res.json({ authenticated: true, user });
+      } catch {
+        return res.status(200).json({ authenticated: false });
+      }
+    }
+
+    return res.status(200).json({ authenticated: false });
   }
 
   @Post('refresh')
