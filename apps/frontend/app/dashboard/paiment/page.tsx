@@ -36,14 +36,8 @@ export default function PaymentsPage() {
          return;
       }
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/payments`, {
-          credentials: "include",
-        });
-        if (res.ok) {
-          const json = await res.json();
-          setPayments(json.data !== undefined ? json.data : json || []);
-        }
+        const json = await fetchWithAuth("/payments");
+        setPayments(json.data !== undefined ? json.data : json || []);
       } catch (err) {
         console.error('Failed to fetch payments:', err);
       } finally {

@@ -54,12 +54,14 @@ import { MetricsController } from './core/metrics/metrics.controller';
     }),
     MailerModule.forRoot({
       transport: {
-        host: process.env.MAIL_HOST || 'smtp.example.com',
-        port: 587,
+        service: 'gmail',
         auth: {
-          user: process.env.MAIL_USER || 'user',
-          pass: process.env.MAIL_PASS || 'pass',
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
         },
+      },
+      defaults: {
+        from: `"No Reply" <${process.env.MAIL_FROM || process.env.MAIL_USER}>`,
       },
     }),
     CacheModule.register({

@@ -40,40 +40,34 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-muted/30">
       <motion.aside
-        initial={{ x: -300 }}
+        initial={{ x: -100 }}
         animate={{ x: 0 }}
-        className="w-[280px] bg-background border-r flex flex-col shadow-sm z-50 sticky top-0 h-screen"
+        className="w-[80px] bg-background border-r flex flex-col shadow-sm z-50 sticky top-0 h-screen items-center py-8"
       >
-        <div className="h-24 flex items-center px-8 border-b">
-          <h1 className="font-black italic text-3xl tracking-tighter">
-            REN<span className="text-primary">AULT</span>
-          </h1>
+        <div className="mb-12">
+          <div className="w-10 h-10 border-2 border-primary rotate-45 flex items-center justify-center">
+            <div className="-rotate-45 font-black text-[10px]">R</div>
+          </div>
         </div>
 
-        <nav className="flex-1 px-4 py-8 flex flex-col gap-2 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-6">
           {SIDEBAR_LINKS.map((link) => {
             const isActive = pathname === link.href;
             const Icon = link.icon;
             return (
               <Link key={link.href} href={link.href}>
                 <div
-                  aria-current={isActive ? "page" : undefined}
-                  className={`group relative flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-[15px] tracking-wide transition-all duration-300 ${
+                  className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${
                     isActive
-                      ? "bg-foreground text-background shadow-lg"
-                      : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
+                      ? "bg-primary text-black shadow-lg shadow-primary/20"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
-                  <Icon
-                    className={`w-5 h-5 transition-colors ${
-                       isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary"
-                    }`}
-                  />
-                  {link.label}
+                  <Icon className="w-5 h-5" />
                   {isActive && (
                     <motion.div
-                      layoutId="activeTab"
-                      className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary"
+                      layoutId="activeIndicator"
+                      className="absolute -left-4 w-1 h-6 bg-primary rounded-r-full"
                     />
                   )}
                 </div>
@@ -82,34 +76,36 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-6 border-t">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary-foreground">
-              {user?.name?.charAt(0) || "U"}
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm">{user?.name || "Utilisateur"}</span>
-              <span className="text-xs text-muted-foreground truncate max-w-[140px]">{user?.email || "Authentifie"}</span>
-            </div>
-          </div>
+        <div className="flex flex-col gap-6 items-center">
           <Button
-            variant="destructive"
+            variant="ghost"
+            size="icon"
             onClick={() => logout()}
-            className="w-full gap-2 font-bold"
+            className="w-12 h-12 rounded-2xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
-            <LogOut className="w-4 h-4" />
-            DECONNEXION
+            <LogOut className="w-5 h-5" />
           </Button>
+          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary overflow-hidden border-2 border-primary/20">
+            {user?.name?.charAt(0) || "U"}
+          </div>
         </div>
       </motion.aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b h-24 flex items-center px-8 justify-between">
-          <h2 className="font-black text-xl tracking-tight capitalize">
-            {SIDEBAR_LINKS.find((l) => l.href === pathname)?.label || "Tableau de Bord"}
-          </h2>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" aria-label="Paramètres" className="rounded-full bg-muted/50 hover:bg-primary/20">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b h-20 flex items-center px-12 justify-between">
+           <div className="flex flex-col">
+              <h2 className="font-black text-xl tracking-tighter uppercase">
+                RENAULT <span className="text-primary italic">RDV</span>
+              </h2>
+              <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Console Client v2.0</p>
+           </div>
+          
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center bg-muted/50 px-4 py-2 rounded-xl gap-3 border border-border/50">
+               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+               <span className="text-[10px] font-black uppercase tracking-wider">Serveur Opérationnel</span>
+            </div>
+            <Button variant="ghost" size="icon" className="rounded-xl bg-muted/50">
               <Settings className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>

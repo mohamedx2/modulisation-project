@@ -6,6 +6,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { fetchWithAuth } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function OcrScannerPage() {
@@ -71,14 +72,10 @@ export default function OcrScannerPage() {
     const formData = new FormData();
     formData.append("image", file);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/ocr/matricule`, {
+      const data = await fetchWithAuth("/ocr/matricule", {
         method: "POST",
-        credentials: "include",
         body: formData,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Erreur de numérisation OCR");
       setResult(data.data !== undefined ? data.data : data);
     } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       setError(err.message);
