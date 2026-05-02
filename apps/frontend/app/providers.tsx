@@ -2,22 +2,25 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
+  role: string;
 }
 
 interface SessionContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<User>;
+  signup: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextType>({
   user: null,
   loading: true,
-  login: async () => { },
+  login: async () => ({ id: '', name: '', email: '', role: '' }),
+  signup: async () => { },
   logout: async () => { },
 });
 
@@ -68,6 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data.user;
   };
 
+  const signup = async (email: string, password: string, firstName: string, lastName: string) => {
+    const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password, firstName, lastName }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || "Signup failed");
+    }
+  };
+
   const logout = async () => {
     await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/logout", {
       method: "POST",
@@ -92,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SessionContext.Provider value={{ user, loading, login, logout }}>
+    <SessionContext.Provider value={{ user, loading, login, signup, logout }}>
       {children}
     </SessionContext.Provider>
   );

@@ -7,6 +7,11 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
   "clients": [
     {
       "clientId": "backend",
@@ -62,6 +67,22 @@
         }
       ],
       "realmRoles": ["admin"]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@reno.com",
+      "firstName": "System",
+      "lastName": "Administrator",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin@123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin", "SUPER_ADMIN"]
     }
   ],
   "roles": {
@@ -73,6 +94,14 @@
       {
         "name": "user",
         "description": "User role"
+      },
+      {
+        "name": "SUPER_ADMIN",
+        "description": "Super Administrator role"
+      },
+      {
+        "name": "SUPER_USER",
+        "description": "Regular user role"
       }
     ]
   }

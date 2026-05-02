@@ -7,11 +7,18 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
   constructor(private readonly prisma: PrismaService) { }
 
+  private mapKeycloakRolesToRole(roles: string[]): string {
+    if (roles.includes('SUPER_ADMIN')) return 'SUPER_ADMIN';
+    if (roles.includes('admin')) return 'ADMIN';
+    if (roles.includes('MECHANIC') || roles.includes('mechanic')) return 'MECHANIC';
+    return 'USER';
+  }
+
   async login(username: string, password: string, res: Response) {
-    const keycloakUrl = process.env.KEYCLOAK_URL || 'http://keycloak:8080';
+    const keycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
     const realm = process.env.KEYCLOAK_REALM || 'reno';
     const clientId = process.env.KEYCLOAK_CLIENT_ID || 'backend';
-    const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET || 'lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6';
+    const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET || process.env.KEYCLOAK_SECRET || 'lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6';
 
     const tokenUrl = `${keycloakUrl}/realms/${realm}/protocol/openid-connect/token`;
 
@@ -24,6 +31,8 @@ export class AuthService {
         password,
       });
 
+      console.log(`[AuthService] Attempting Keycloak login for: ${username} at ${tokenUrl}`);
+      
       const response = await fetch(tokenUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -34,17 +43,25 @@ export class AuthService {
         const tokens = await response.json();
         const jwtPayload = JSON.parse(Buffer.from(tokens.access_token.split('.')[1], 'base64').toString());
 
+        const realmRoles = jwtPayload.realm_access?.roles || [];
+        const mappedRole = this.mapKeycloakRolesToRole(realmRoles);
+
+        const email = username.includes('@') ? username : `${username}@reno.com`;
+        const name = jwtPayload.name || jwtPayload.preferred_username || username;
+
         const user = await this.prisma.user.upsert({
-          where: { email: username.includes('@') ? username : `${username}@reno.com` },
-          update: { name: username },
+          where: { email },
+          update: { name, role: mappedRole as any },
           create: {
             id: jwtPayload.sub,
-            email: username.includes('@') ? username : `${username}@reno.com`,
-            name: username,
+            email,
+            name,
             password: 'authenticated',
+            role: mappedRole as any,
           },
         });
 
+        console.log(`[AuthService] Keycloak login successful for: ${username}`);
         this.setCookies(res, tokens, user.id);
 
         return {
@@ -55,9 +72,12 @@ export class AuthService {
             role: user.role,
           },
         };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn(`[AuthService] Keycloak login failed: ${response.status} - ${JSON.stringify(errorData)}`);
       }
     } catch (error) {
-      console.error('Keycloak login failed, attempting local fallback:', error.message);
+      console.error('[AuthService] Keycloak connection failed:', error.message);
     }
 
     // Fallback: Local Database Authentication
@@ -151,14 +171,18 @@ export class AuthService {
       payload.preferred_username ||
       email;
 
+    const realmRoles = payload.realm_access?.roles || [];
+    const mappedRole = this.mapKeycloakRolesToRole(realmRoles);
+
     const user = await this.prisma.user.upsert({
       where: { email },
-      update: { name },
+      update: { name, role: mappedRole as any },
       create: {
         id: payload.sub,
         email,
         name,
         password: 'keycloak-managed',
+        role: mappedRole as any,
       },
     });
 
@@ -168,6 +192,114 @@ export class AuthService {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
+  async signup(email: string, password: string, firstName: string, lastName: string) {
+    const keycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
+    const realm = process.env.KEYCLOAK_REALM || 'reno';
+    const adminUser = process.env.KEYCLOAK_ADMIN || 'admin';
+    const adminPassword = process.env.KEYCLOAK_ADMIN_PASSWORD || 'admin';
+
+    const tokenUrl = `${keycloakUrl}/realms/master/protocol/openid-connect/token`;
+
+    const tokenResponse = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: 'admin-cli',
+        grant_type: 'password',
+        username: adminUser,
+        password: adminPassword,
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      throw new UnauthorizedException('Failed to obtain admin token from Keycloak');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const adminToken = tokenData.access_token;
+
+    const adminApiUrl = `${keycloakUrl}/admin/realms/${realm}/users`;
+
+    const createResponse = await fetch(adminApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify({
+        username: email,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        enabled: true,
+        emailVerified: false,
+        credentials: [
+          {
+            type: 'password',
+            value: password,
+            temporary: false,
+          },
+        ],
+      }),
+    });
+
+    if (createResponse.status === 409) {
+      throw new UnauthorizedException('User already exists');
+    }
+
+    if (!createResponse.ok) {
+      const error = await createResponse.text();
+      console.error('[AuthService] Keycloak user creation failed:', error);
+      throw new UnauthorizedException('Failed to create user');
+    }
+
+    const getUsersResponse = await fetch(`${adminApiUrl}?email=${encodeURIComponent(email)}`, {
+      headers: {
+        'Authorization': `Bearer ${adminToken}`,
+      },
+    });
+
+    let keycloakUserId: string | null = null;
+    if (getUsersResponse.ok) {
+      const users = await getUsersResponse.json();
+      if (users.length > 0) {
+        keycloakUserId = users[0].id;
+      }
+    }
+
+    if (keycloakUserId) {
+      const userRoleResponse = await fetch(`${keycloakUrl}/admin/realms/${realm}/users/${keycloakUserId}/role-mappings/realm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify([
+          { id: 'user-role-id', name: 'user' },
+        ]),
+      });
+
+      if (!userRoleResponse.ok) {
+        console.warn('[AuthService] Could not assign default role to new user');
+      }
+    }
+
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        name: `${firstName} ${lastName}`,
+        password: 'keycloak-managed',
+      },
     });
 
     return {

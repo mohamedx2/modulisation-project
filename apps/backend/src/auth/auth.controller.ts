@@ -21,6 +21,27 @@ export class AuthController {
     }
   }
 
+  @Post('signup')
+  async signup(
+    @Body() body: { email: string; password: string; firstName: string; lastName: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.authService.signup(
+        body.email,
+        body.password,
+        body.firstName,
+        body.lastName,
+      );
+      return res.status(201).json(result);
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Failed to create account');
+    }
+  }
+
   @Post('logout')
   async logout(@Res() res: Response) {
     const result = await this.authService.logout(res);

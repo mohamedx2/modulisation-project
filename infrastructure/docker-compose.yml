@@ -9,6 +9,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     networks:
       - saas-network
     healthcheck:
@@ -29,7 +30,7 @@ services:
     command: start-dev --import-realm
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://db:5432/renault_db
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak_db
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: password
       KEYCLOAK_ADMIN: admin
@@ -64,6 +65,8 @@ services:
       - KEYCLOAK_REALM=reno
       - KEYCLOAK_CLIENT_ID=backend
       - KEYCLOAK_CLIENT_SECRET=lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
       - FRONTEND_URL=http://localhost:3000
     depends_on:
       db:

@@ -25,6 +25,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 
 import { MetricsController } from './core/metrics/metrics.controller';
+import { UniversalAuthGuard } from './core/security/universal-auth.guard';
+import { UniversalRoleGuard } from './core/security/universal-role.guard';
+import { UniversalResourceGuard } from './core/security/universal-resource.guard';
 
 @Module({
   imports: [
@@ -89,9 +92,9 @@ import { MetricsController } from './core/metrics/metrics.controller';
     AppService,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     { provide: APP_GUARD, useClass: ThrottlerGuard },
-    { provide: APP_GUARD, useClass: AuthGuard },
-    { provide: APP_GUARD, useClass: ResourceGuard },
-    { provide: APP_GUARD, useClass: RoleGuard },
+    { provide: APP_GUARD, useClass: UniversalAuthGuard },
+    { provide: APP_GUARD, useClass: UniversalResourceGuard },
+    { provide: APP_GUARD, useClass: UniversalRoleGuard },
   ],
 })
 export class AppModule {}

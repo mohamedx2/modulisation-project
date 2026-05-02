@@ -4,14 +4,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Lock, User, Mail, ShieldCheck, CheckCircle2, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../providers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { signup } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -27,14 +30,19 @@ export default function SignupPage() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate backend API call
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      await signup(formData.email, formData.password, formData.prenom, formData.nom);
+      setStep(3);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Echec de la creation du compte");
+    } finally {
       setIsLoading(false);
-      setStep(3); // Success step
-    }, 1500);
+    }
   };
 
   return (
@@ -130,6 +138,15 @@ export default function SignupPage() {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-8"
                 >
+                  {error && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-black uppercase tracking-widest text-center"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
                   <div className="space-y-6">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Email Professionnel</label>
