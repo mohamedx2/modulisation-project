@@ -16,9 +16,14 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const message = errorData.message || `API error: ${response.status}`;
+    let message = errorData.message || `API error: ${response.status}`;
+    if (Array.isArray(message)) {
+      message = message.join(', ');
+    } else if (typeof message === 'object' && message.message) {
+      message = Array.isArray(message.message) ? message.message.join(', ') : message.message;
+    }
     console.error('API error:', response.status, message);
-    const error = new Error(Array.isArray(message) ? message[0] : message);
+    const error = new Error(message as string);
     (error as any).statusCode = response.status;
     (error as any).data = errorData;
     throw error;

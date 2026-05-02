@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Home, FileText, CreditCard, Settings, LogOut, Smartphone, Calendar, History, PlusCircle } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 const SIDEBAR_LINKS = [
@@ -46,9 +47,18 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
         className="w-[80px] bg-background border-r flex flex-col shadow-sm z-50 sticky top-0 h-screen items-center py-8"
       >
         <div className="mb-12">
-          <div className="w-10 h-10 border-2 border-primary rotate-45 flex items-center justify-center">
-            <div className="-rotate-45 font-black text-[10px]">R</div>
-          </div>
+          <Link href="/dashboard">
+            <div className="w-12 h-12 relative flex items-center justify-center group">
+              <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <Image 
+                src="/favicon.svg" 
+                alt="Renault Axis Logo" 
+                width={48} 
+                height={48} 
+                className="relative z-10 transition-transform duration-500 group-hover:scale-110"
+              />
+            </div>
+          </Link>
         </div>
 
         <nav className="flex-1 flex flex-col gap-6">
@@ -94,11 +104,20 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b h-20 flex items-center px-12 justify-between">
-           <div className="flex flex-col">
-              <h2 className="font-black text-xl tracking-tighter uppercase">
-                RENAULT <span className="text-primary italic">RDV</span>
-              </h2>
-              <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Console Client v2.0</p>
+           <div className="flex items-center gap-4">
+              <Image 
+                src="/favicon.svg" 
+                alt="Logo" 
+                width={32} 
+                height={32} 
+                className="rounded-lg shadow-sm"
+              />
+              <div className="flex flex-col">
+                <h2 className="font-black text-xl tracking-tighter uppercase">
+                  RENAULT <span className="text-primary italic">RDV</span>
+                </h2>
+                <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Console Client v2.0</p>
+              </div>
            </div>
           
           <div className="flex items-center gap-6">

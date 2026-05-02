@@ -19,7 +19,8 @@ export default function VerifyRDVPage() {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
         const res = await fetch(`${baseUrl}/tickets/verify/${id}`);
         if (!res.ok) throw new Error();
-        const data = await res.json();
+        const json = await res.json();
+        const data = json.data || json;
         setTicket(data);
       } catch (err) {
         setError(true);
@@ -50,6 +51,21 @@ export default function VerifyRDVPage() {
       </div>
     );
   }
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return {
+      day: d.toLocaleDateString('fr-FR', { day: '2-digit' }),
+      month: d.toLocaleDateString('fr-FR', { month: 'short' }),
+      time: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    };
+  };
+
+  const dateInfo = ticket.scheduledAt 
+    ? formatDate(ticket.scheduledAt)
+    : formatDate(ticket.createdAt);
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6">
@@ -114,17 +130,16 @@ export default function VerifyRDVPage() {
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Date</p>
                     <p className="text-lg font-black text-white uppercase italic tracking-tight">
-                      {ticket.description?.includes('RDV:') 
-                        ? ticket.description.split(' | ')[0].replace('RDV: ', '').split(' à ')[0]
-                        : (ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : "---")}
+                      {dateInfo ? dateInfo.day : "---"}
                     </p>
+                    {dateInfo && (
+                      <p className="text-[10px] font-bold text-primary/60 uppercase tracking-widest mt-0.5">{dateInfo.month}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Heure</p>
                     <p className="text-lg font-black text-white uppercase italic tracking-tight">
-                      {ticket.description?.includes(' à ') 
-                        ? ticket.description.split(' | ')[0].split(' à ')[1]
-                        : (ticket.createdAt ? new Date(ticket.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : "--:--")}
+                      {dateInfo ? dateInfo.time : "--:--"}
                     </p>
                   </div>
                 </div>

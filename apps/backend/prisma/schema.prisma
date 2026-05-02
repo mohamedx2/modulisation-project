@@ -1301,6 +1301,7 @@ model Vehicle {
   name        String
   plate       String
   img         String?
+  imageData   Bytes?
   lastService String?
   health      Int       @default(100)
   tenantId    String

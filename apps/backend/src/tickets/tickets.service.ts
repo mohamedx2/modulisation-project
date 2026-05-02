@@ -22,32 +22,35 @@ export class TicketsService {
     let scheduledAtDate: Date | null = null;
     
     if (createTicketDto.scheduledAt) {
-      // Use direct parsing to avoid timezone shifts
-      // Input format: YYYY-MM-DDTHH:mm:00
-      scheduledAtDate = new Date(createTicketDto.scheduledAt);
-      
-      this.logger.log(`Validating RDV: ${createTicketDto.scheduledAt} -> Parsed: ${scheduledAtDate.toISOString()}`);
-
       const [datePart, timePart] = createTicketDto.scheduledAt.split('T');
       const [year, month, dayNum] = datePart.split('-').map(Number);
       const [hours, minutes] = timePart.split(':').map(Number);
 
-      // 1. Check Working Days (using a helper to get day of week for that specific date string)
-      const dayOfWeek = new Date(year, month - 1, dayNum).getDay();
+      // Parse as UTC to avoid server timezone shifts
+      scheduledAtDate = new Date(Date.UTC(year, month - 1, dayNum, hours, minutes, 0));
+      
+      this.logger.log(`Validating RDV: ${createTicketDto.scheduledAt} -> UTC: ${scheduledAtDate.toISOString()}`);
+
+      // 1. Check Working Days (use UTC day to match the input date)
+      const dayOfWeek = scheduledAtDate.getUTCDay();
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         throw new BadRequestException('Les rendez-vous ne sont pas disponibles le week-end (Samedi/Dimanche).');
       }
 
-      // 2. Check Working Hours (9:00 - 17:00) using the raw hours from string
+      // 2. Check Working Hours (9:00 - 17:00)
       if (hours < 9 || hours >= 17) {
         throw new BadRequestException(`Veuillez choisir une heure entre 09:00 et 17:00. (Reçu: ${hours}h)`);
       }
 
-      // 3. Check for Conflicts (Overlap)
+      // 3. Check for Conflicts (Overlap) - use a range to match the exact slot
+      const slotEnd = new Date(scheduledAtDate.getTime() + 60 * 60 * 1000); // 1 hour slot
       const existing = await this.prisma.ticket.findFirst({
         where: {
           tenantId,
-          scheduledAt: scheduledAtDate,
+          scheduledAt: {
+            gte: scheduledAtDate,
+            lt: slotEnd,
+          },
           deletedAt: null,
           status: { not: 'CLOSED' }
         }
@@ -126,6 +129,15 @@ export class TicketsService {
         tenantId,
         deletedAt: null,
       },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        scheduledAt: true,
+        createdBy: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -136,6 +148,15 @@ export class TicketsService {
         createdBy: userId,
         tenantId,
         deletedAt: null,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        scheduledAt: true,
+        createdAt: true,
+        updatedAt: true,
       },
       orderBy: { createdAt: 'desc' },
     });

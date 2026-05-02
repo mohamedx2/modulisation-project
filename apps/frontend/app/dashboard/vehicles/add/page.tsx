@@ -61,7 +61,6 @@ export default function AddVehiclePage() {
         method: "POST",
         body: formData
       });
-      console.log("Res", res);
 
       if (res) {
         const { data } = res;
@@ -70,6 +69,7 @@ export default function AddVehiclePage() {
           model: data.model || "",
           plate: data.plate || "",
           vin: data.vin || "",
+          img: "",
           name: data.brand && data.model ? `${data.brand} ${data.model}` : ""
         };
         setVehicleData(extractedData);
@@ -89,15 +89,26 @@ export default function AddVehiclePage() {
 
   const saveVehicleWithData = async (data: typeof vehicleData) => {
     setLoading(true);
+    let vehicleId: string | null = null;
     try {
-      await fetchWithAuth("/dashboard/vehicles", {
+      const created = await fetchWithAuth("/vehicles", {
         method: "POST",
         body: JSON.stringify({
           name: data.name || `${data.brand} ${data.model}`.trim() || "Véhicule Inconnu",
           plate: data.plate,
-          img: carPreview || "https://images.unsplash.com/photo-1619105432616-2f08a50f14ce?auto=format&fit=crop&q=80&w=1200"
         })
       });
+      vehicleId = created.data?.id || created.id;
+
+      if (carFile && vehicleId) {
+        const formData = new FormData();
+        formData.append("image", carFile);
+        await fetchWithAuth(`/vehicles/${vehicleId}/image`, {
+          method: "POST",
+          body: formData,
+        });
+      }
+
       toast.success("Véhicule ajouté avec succès !");
       router.push("/dashboard");
     } catch (err) {

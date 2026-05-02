@@ -16,12 +16,13 @@ import {
   AuthGuard,
 } from 'nest-keycloak-connect';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
 
 import { MetricsController } from './core/metrics/metrics.controller';
 
@@ -80,6 +81,8 @@ import { MetricsController } from './core/metrics/metrics.controller';
     TicketsModule,
     PaymentsModule,
     DashboardModule,
+    VehiclesModule,
+    PrismaModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [
@@ -89,7 +92,6 @@ import { MetricsController } from './core/metrics/metrics.controller';
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: ResourceGuard },
     { provide: APP_GUARD, useClass: RoleGuard },
-    PrismaService,
   ],
 })
 export class AppModule {}

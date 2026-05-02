@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Camera, UploadCloud, CheckCircle2, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Camera, UploadCloud, CheckCircle2, Loader2, AlertCircle, RefreshCw, Activity } from "lucide-react";
 import { useAuth } from "../../providers";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -85,21 +85,31 @@ export default function OcrScannerPage() {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto space-y-8">
-      <div className="mb-10">
-        <h1 className="text-4xl font-black tracking-tight">Scanner de Plaque</h1>
-        <p className="text-muted-foreground mt-2 font-medium text-lg">Système de reconnaissance automatique de véhicules (LPR).</p>
-      </div>
+    <div className="p-8 lg:p-12 max-w-7xl mx-auto space-y-12 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64 z-0 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -ml-32 -mb-32 z-0 pointer-events-none" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12 relative z-10"
+      >
+        <h1 className="text-5xl lg:text-6xl font-black tracking-tighter uppercase italic leading-none">Diagnostic <span className="text-primary italic">Optique</span></h1>
+        <p className="text-muted-foreground mt-4 font-bold text-lg max-w-2xl">Système de reconnaissance automatique de matricules (LPR) haute précision par <span className="text-foreground">Renault Axis</span>.</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
         <Card 
-          className={`rounded-2xl overflow-hidden shadow-xl transition-all border-2 border-dashed ${isDragOver ? 'border-primary bg-primary/5' : 'border-border'}`}
+          className={`rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500 border-none relative group ${
+            isDragOver ? 'ring-4 ring-primary bg-primary/5' : 'bg-white dark:bg-zinc-900'
+          }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !file && fileInputRef.current?.click()}
         >
-          <CardContent className="p-8 flex flex-col items-center justify-center min-h-[400px] h-full cursor-pointer relative">
+          <CardContent className="p-12 flex flex-col items-center justify-center min-h-[500px] h-full cursor-pointer relative">
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -109,89 +119,138 @@ export default function OcrScannerPage() {
             />
 
             {!file ? (
-              <div className="flex flex-col items-center">
-                <UploadCloud className="w-16 h-16 text-muted-foreground hover:text-primary transition-colors mb-6" />
-                <h3 className="text-xl font-bold text-center mb-2">Glissez une image ici</h3>
-                <p className="text-muted-foreground font-medium text-center mb-8">ou cliquez pour parcourir vos fichiers (JPG, PNG)</p>
+              <div className="flex flex-col items-center text-center space-y-8">
+                <div className="w-24 h-24 bg-primary/10 rounded-[2rem] flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                  <UploadCloud className="w-10 h-10 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Scanner une image</h3>
+                  <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest opacity-60">Glissez-déposez ou cliquez pour parcourir</p>
+                </div>
                 <Button 
                   aria-label="Activer la caméra"
-                  onClick={(e) => { e.stopPropagation(); /* Logic for camera  */ }} 
+                  onClick={(e) => { e.stopPropagation(); }} 
                   size="lg"
-                  className="rounded-xl font-bold shadow-lg"
+                  className="rounded-2xl font-black uppercase italic tracking-tight h-14 px-8 shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all"
                 >
-                  <Camera className="w-5 h-5 mr-2" /> Activer la Caméra
+                  <Camera className="w-6 h-6 mr-3" /> Activer la Caméra
                 </Button>
               </div>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center cursor-default">
-                <div className="absolute top-4 right-4 flex gap-2">
+              <div className="w-full h-full flex flex-col items-center justify-center cursor-default space-y-8">
+                <div className="absolute top-8 right-8 z-20">
                   <Button 
                     aria-label="Refaire une photo"
                     onClick={(e) => { e.stopPropagation(); resetForm(); }} 
-                    variant="destructive" size="icon" className="rounded-full shadow-lg"
+                    variant="destructive" size="icon" className="rounded-full w-12 h-12 shadow-2xl active:scale-90 transition-all"
                   >
-                    <RefreshCw className="w-5 h-5" />
+                    <RefreshCw className="w-6 h-6" />
                   </Button>
                 </div>
-                <img src={preview!} alt="Aperçu" className="w-full h-full object-contain rounded-xl max-h-[300px] shadow-sm mb-6" />
+                <div className="relative w-full aspect-video rounded-[2rem] overflow-hidden bg-black shadow-2xl border-4 border-zinc-100 dark:border-zinc-800">
+                  <img src={preview!} alt="Aperçu" className="w-full h-full object-contain opacity-80" />
+                  
+                  {/* Diagnostic Scanning Line */}
+                  {loading && (
+                    <motion.div 
+                      initial={{ top: "0%" }}
+                      animate={{ top: "100%" }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="absolute left-0 w-full h-1 bg-primary shadow-[0_0_20px_#FFCB05] z-10"
+                    />
+                  )}
+                  
+                  {/* Grid Overlay */}
+                  <div className="absolute inset-0 opacity-10 pointer-events-none" 
+                       style={{ backgroundImage: 'linear-gradient(#FFCB05 1px, transparent 1px), linear-gradient(90deg, #FFCB05 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
+                  />
+                </div>
+
                 <Button 
                   aria-label="Lancer l'analyse OCR"
                   onClick={(e) => { e.stopPropagation(); handleUpload(); }}
                   disabled={loading}
-                  className="rounded-xl font-bold shadow-lg shadow-primary/20"
+                  className="h-16 px-12 rounded-2xl font-black uppercase italic tracking-tight text-xl shadow-2xl shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Camera className="w-4 h-4 mr-2" />}
+                  {loading ? <Loader2 className="w-7 h-7 mr-3 animate-spin" /> : <Activity className="w-7 h-7 mr-3" />}
                   {loading ? 'Analyse en cours...' : 'Lancer l\'analyse'}
                 </Button>
               </div>
             )}
+            
+            {/* Decorative stripes for consistency */}
+            <div className="absolute top-0 right-0 w-24 h-full flex gap-1 opacity-[0.02] rotate-12 -mr-8 pointer-events-none">
+               <div className="w-4 h-full bg-primary" />
+               <div className="w-2 h-full bg-primary" />
+               <div className="w-8 h-full bg-primary" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-border/50 shadow-inner bg-muted/20">
-          <CardContent className="p-8 flex flex-col h-full">
-            <h3 className="text-lg font-black mb-6">Résultat de l&apos;analyse</h3>
+        <Card className="rounded-[3rem] border-none shadow-sm bg-zinc-50 dark:bg-zinc-900/50 flex flex-col relative overflow-hidden">
+          <CardContent className="p-12 flex flex-col h-full relative z-10">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-12 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" /> Rapport de Scan
+            </h3>
             
             {error && (
-              <Alert variant="destructive" className="mb-6 rounded-xl">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="font-medium ml-2">{error}</AlertDescription>
+              <Alert variant="destructive" className="mb-8 rounded-2xl bg-destructive/10 border-none p-6">
+                <AlertCircle className="h-6 w-6" />
+                <AlertDescription className="font-black uppercase italic text-sm ml-3">{error}</AlertDescription>
               </Alert>
             )}
 
-            {loading ? (
-              <div className="w-full max-w-xl mx-auto space-y-4">
-                <Skeleton className="h-8 w-64 mx-auto" />
-                <Skeleton className="h-32 w-full rounded-2xl" />
-              </div>
-            ) : result ? (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col justify-center items-center">
-                <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mb-6 shadow-sm ring-8 ring-green-500/5">
-                  <CheckCircle2 className="w-12 h-12 text-green-600" />
-                </div>
-                <p className="text-muted-foreground font-bold text-sm uppercase tracking-widest mb-2">Matricule détectée</p>
-                <div className="bg-background px-8 py-4 rounded-xl border border-border font-mono text-4xl font-black tracking-wider shadow-sm mb-6">
-                  {result.matricule || "NON DÉTECTÉ"}
-                </div>
-                
-                <div className="w-full bg-background p-4 rounded-xl border border-border shadow-sm mt-4 text-left">
-                  <p className="text-xs font-bold text-muted-foreground uppercase mb-2">Données Brutes (Raw)</p>
-                  <div className="text-sm font-mono whitespace-pre-wrap break-all text-muted-foreground">
-                    {result.raw || "Aucune donnée brute extraite."}
+            <div className="flex-1 flex flex-col justify-center">
+              {loading ? (
+                <div className="space-y-8">
+                  <div className="flex justify-center">
+                    <Loader2 className="w-16 h-16 animate-spin text-primary opacity-20" />
+                  </div>
+                  <div className="space-y-4">
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                    <Skeleton className="h-40 w-full rounded-[2rem]" />
                   </div>
                 </div>
-              </motion.div>
-            ) : (
-              <div className="flex-1 flex items-center justify-center flex-col text-center opacity-50">
-                <div className="w-20 h-12 border-2 border-dashed border-muted-foreground/30 rounded flex items-center justify-center font-mono text-xl font-black text-muted-foreground mb-4">
-                  ---
+              ) : result ? (
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-24 h-24 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
+                      <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+                    </div>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Matricule Identifiée</p>
+                    <div className="bg-zinc-950 text-white px-10 py-6 rounded-[2rem] border border-zinc-800 font-mono text-5xl font-black tracking-widest shadow-2xl italic">
+                      {result.matricule || "ERREUR"}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Flux de Données (Raw)</label>
+                    <div className="bg-white dark:bg-zinc-950 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 shadow-inner font-mono text-sm leading-relaxed text-muted-foreground overflow-auto max-h-[200px]">
+                      <div className="flex items-center gap-2 text-primary mb-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        <span className="font-black text-[9px] uppercase tracking-widest">Metadata Extraction</span>
+                      </div>
+                      {result.raw || "Aucune métadonnée brute extraite."}
+                    </div>
+                  </div>
+                  
+                  <Button variant="outline" className="w-full h-14 rounded-2xl font-black uppercase italic tracking-tight border-primary/20 text-primary hover:bg-primary/10 transition-all">
+                    Exporter le Diagnostic &rarr;
+                  </Button>
+                </motion.div>
+              ) : (
+                <div className="flex flex-col items-center text-center space-y-6 opacity-30">
+                  <div className="w-32 h-16 border-4 border-dashed border-zinc-400 rounded-2xl flex items-center justify-center font-mono text-3xl font-black text-zinc-400 italic">
+                    --- ---
+                  </div>
+                  <p className="text-zinc-500 font-black uppercase italic tracking-widest text-xs">Système prêt pour numérisation</p>
                 </div>
-                <p className="text-muted-foreground font-medium">
-                  {loading ? "Traitement de l'image en cours..." : "En attente d'une numérisation..."}
-                </p>
-              </div>
-            )}
+              )}
+            </div>
           </CardContent>
+          
+          {/* Decorative background element for the results panel */}
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] -mr-32 -mb-32 rounded-full" />
         </Card>
       </div>
     </div>

@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { OcrService } from './ocr.service';
 import { OcrController } from './ocr.controller';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  providers: [OcrService, PrismaService],
+  imports: [PrismaModule],
+  providers: [OcrService],
   controllers: [OcrController],
   exports: [OcrService],
 })
