@@ -14,6 +14,7 @@ import {
   ResourceGuard,
   RoleGuard,
   AuthGuard,
+  TokenValidation,
 } from 'nest-keycloak-connect';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaModule } from './prisma/prisma.module';
@@ -52,9 +53,7 @@ import { UniversalResourceGuard } from './core/security/universal-resource.guard
       useNestLogger: true,
       verifyTokenAudience: false,
       cookieKey: 'access_token',
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      tokenValidation: 'offline',
+      tokenValidation: TokenValidation.OFFLINE,
     }),
     MailerModule.forRoot({
       transport: {
@@ -97,4 +96,4 @@ import { UniversalResourceGuard } from './core/security/universal-resource.guard
     { provide: APP_GUARD, useClass: UniversalRoleGuard },
   ],
 })
-export class AppModule {}
+export class AppModule { }

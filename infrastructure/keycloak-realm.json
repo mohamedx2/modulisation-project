@@ -69,6 +69,22 @@
       "realmRoles": ["admin"]
     },
     {
+      "username": "admin_axis@reno.com",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin_axis@reno.com",
+      "firstName": "Axis",
+      "lastName": "Administrator",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin@123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    },
+    {
       "username": "admin",
       "enabled": true,
       "emailVerified": true,

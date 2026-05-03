@@ -20,7 +20,7 @@ export class DashboardService {
 
     return [
       { name: 'Total Tickets', value: totalTickets.toString(), iconType: 'Ticket', change: '+0%', changeType: 'neutral' },
-      { name: 'Pending Payments', value: `${pendingPayments._sum.amount || 0} €`, iconType: 'CreditCard', change: '0%', changeType: 'neutral' },
+      { name: 'Pending Payments', value: `${pendingPayments._sum.amount || 0} EUR`, iconType: 'CreditCard', change: '0%', changeType: 'neutral' },
       { name: 'Active Mechanics', value: activeMechanics.length.toString(), iconType: 'Users', change: '+0%', changeType: 'neutral' },
       { name: 'System Health', value: '98.9%', iconType: 'Activity', change: '+1.2%', changeType: 'positive' },
     ];
@@ -45,8 +45,75 @@ export class DashboardService {
         ...data,
         tenantId,
         health: 100,
-        lastService: 'À l\'instant',
+        lastService: 'A l\'instant',
       },
+    });
+  }
+
+  async getAdminStats() {
+    const [totalUsers, totalTickets, totalVehicles, totalPayments, pendingPayments, totalTenants] = await Promise.all([
+      this.prisma.user.count({ where: { deletedAt: null } }),
+      this.prisma.ticket.count({ where: { deletedAt: null } }),
+      this.prisma.vehicle.count({ where: { deletedAt: null } }),
+      this.prisma.payment.count({ where: { deletedAt: null } }),
+      this.prisma.payment.aggregate({
+        where: { deletedAt: null, status: 'PENDING' },
+        _sum: { amount: true },
+      }),
+      this.prisma.tenant.count({ where: { isActive: true } }),
+    ]);
+
+    const roleCounts = await this.prisma.user.groupBy({
+      by: ['role'],
+      _count: { role: true },
+      where: { deletedAt: null },
+    });
+
+    return {
+      totalUsers,
+      totalTickets,
+      totalVehicles,
+      totalPayments,
+      pendingAmount: pendingPayments._sum.amount || 0,
+      totalTenants,
+      roleCounts: roleCounts.reduce((acc, r) => {
+        acc[r.role] = r._count.role;
+        return acc;
+      }, {} as Record<string, number>),
+    };
+  }
+
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        tenantId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateUserRole(userId: string, role: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error('User not found');
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role: role as any },
+    });
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error('User not found');
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { deletedAt: new Date() },
     });
   }
 }

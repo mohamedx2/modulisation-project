@@ -61,6 +61,26 @@ export class TicketsService {
       }
     }
 
+    // Ensure the tenant exists (auto-create on fresh databases)
+    await this.prisma.tenant.upsert({
+      where: { id: tenantId },
+      update: {},
+      create: { id: tenantId, name: 'Default Tenant' },
+    });
+
+    // Ensure the user exists locally (Keycloak users may not have a DB record yet)
+    await this.prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        email: userEmail || `${userId}@reno.com`,
+        name: userEmail?.split('@')[0] || 'User',
+        password: 'keycloak-managed',
+        tenantId,
+      },
+    });
+
     const ticket = await this.prisma.ticket.create({
       data: {
         title: createTicketDto.title,
@@ -129,17 +149,59 @@ export class TicketsService {
         tenantId,
         deletedAt: null,
       },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        status: true,
-        scheduledAt: true,
-        createdBy: true,
-        createdAt: true,
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findAllAdmin() {
+    return this.prisma.ticket.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            tenantId: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getAdminStats() {
+    const [totalUsers, totalTickets, totalVehicles, totalPayments, pendingPayments] = await Promise.all([
+      this.prisma.user.count({ where: { deletedAt: null } }),
+      this.prisma.ticket.count({ where: { deletedAt: null } }),
+      this.prisma.vehicle.count({ where: { deletedAt: null } }),
+      this.prisma.payment.count({ where: { deletedAt: null } }),
+      this.prisma.payment.aggregate({
+        where: { deletedAt: null, status: 'PENDING' },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    return {
+      totalUsers,
+      totalTickets,
+      totalVehicles,
+      totalPayments,
+      pendingAmount: pendingPayments._sum.amount || 0,
+    };
   }
 
   async findAllMine(userId: string, tenantId: string) {
@@ -237,3 +299,4 @@ export class TicketsService {
     return tickets.map(t => t.scheduledAt);
   }
 }
+

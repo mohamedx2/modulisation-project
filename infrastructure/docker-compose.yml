@@ -13,7 +13,7 @@ services:
     networks:
       - saas-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d renault_db"]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d renault_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -61,13 +61,18 @@ services:
       - DB_PASSWORD=password
       - DB_NAME=renault_db
       - REDIS_URL=redis://redis:6379
-      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_URL=http://localhost:8080
       - KEYCLOAK_REALM=reno
       - KEYCLOAK_CLIENT_ID=backend
       - KEYCLOAK_CLIENT_SECRET=lgLCI4KGNki1p8ULBt7l5A4zCE0kTIb6
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - FRONTEND_URL=http://localhost:3000
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=modulisationotp@gmail.com
+      - MAIL_PASS=rqysvhktgdtsjcwi
+      - MAIL_FROM=modulisationotp@gmail.com
     depends_on:
       db:
         condition: service_healthy
@@ -75,6 +80,8 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+    extra_hosts:
+      - "localhost:host-gateway"
     networks:
       - saas-network
 

@@ -3,8 +3,8 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
+  Patch,
   Delete,
   Res,
   Query,
@@ -14,13 +14,12 @@ import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { AuthenticatedUser, Roles } from 'nest-keycloak-connect';
-
 import { KeycloakUser } from '../core/security/keycloak-user.interface';
 import { Public } from 'nest-keycloak-connect';
 
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(private readonly ticketsService: TicketsService) { }
 
   @Get('verify/:id')
   @Public()
@@ -63,6 +62,18 @@ export class TicketsController {
     return this.ticketsService.findAll(user.tenantId || 'default-tenant-id');
   }
 
+  @Get('admin')
+  @Roles({ roles: ['realm:admin', 'realm:SUPER_ADMIN'] })
+  findAllAdmin() {
+    return this.ticketsService.findAllAdmin();
+  }
+
+  @Get('admin/stats')
+  @Roles({ roles: ['realm:admin', 'realm:SUPER_ADMIN'] })
+  getAdminStats() {
+    return this.ticketsService.getAdminStats();
+  }
+
   @Get('reserved-slots')
   @Roles({ roles: ['realm:user', 'realm:admin', 'realm:default-roles-reno'] })
   getReservedSlots(
@@ -93,16 +104,20 @@ export class TicketsController {
   }
 
   @Patch(':id')
-  @Roles({ roles: ['realm:admin'] })
+  @Roles({ roles: ['realm:admin', 'realm:SUPER_ADMIN'] })
   update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
     return this.ticketsService.update(id, updateTicketDto);
   }
 
+  @Patch(':id/status')
+  @Roles({ roles: ['realm:admin', 'realm:SUPER_ADMIN'] })
+  updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
+    return this.ticketsService.update(id, { status: body.status });
+  }
+
   @Delete(':id')
-  @Roles({ roles: ['realm:admin'] })
+  @Roles({ roles: ['realm:admin', 'realm:SUPER_ADMIN'] })
   remove(@Param('id') id: string) {
     return this.ticketsService.remove(id);
   }
-
-
 }

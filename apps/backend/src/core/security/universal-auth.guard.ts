@@ -57,15 +57,30 @@ export class UniversalAuthGuard extends AuthGuard {
 
         if (user) {
           this._logger.verbose(`Local user found: ${user.email} (${user.role})`);
-          // Populate request.user for @AuthenticatedUser() and other guards
+          const roleLower = user.role.toLowerCase(); // e.g. 'admin'
+          const roleUpper = user.role.toUpperCase(); // e.g. 'ADMIN'
+
+          // Build a comprehensive set of role aliases so this user matches
+          // any @Roles() decorator variation used across the controllers.
+          const roles = [
+            roleLower,                  // 'admin'
+            roleUpper,                  // 'ADMIN'
+            `realm:${roleLower}`,       // 'realm:admin'
+            `realm:${roleUpper}`,       // 'realm:ADMIN'
+            'realm:default-roles-reno', // Keycloak default role
+          ];
+
+          // ADMIN users also get SUPER_ADMIN so they can pass any admin check
+          if (roleLower === 'admin') {
+            roles.push('realm:SUPER_ADMIN', 'realm:super_admin', 'SUPER_ADMIN');
+          }
+
           request.user = {
             sub: user.id,
             email: user.email,
             name: user.name,
             tenantId: user.tenantId || 'default-tenant-id',
-            realm_access: {
-              roles: [user.role.toLowerCase(), `realm:${user.role.toLowerCase()}`],
-            },
+            realm_access: { roles },
           };
           return true;
         }

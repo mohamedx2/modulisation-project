@@ -10,16 +10,13 @@ export class VehiclesService {
   async findAll(tenantId: string) {
     const vehicles = await this.prisma.vehicle.findMany({
       where: { tenantId, deletedAt: null },
-      select: {
-        id: true,
-        name: true,
-        plate: true,
-        img: true,
-        imageData: true,
-        health: true,
-        lastService: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
     return vehicles.map((v) => {
@@ -33,13 +30,41 @@ export class VehiclesService {
 
       return {
         ...v,
+        tenantName: v.tenant?.name || 'Default',
         imageData: v.imageData ? `data:image/jpeg;base64,${Buffer.from(v.imageData).toString('base64')}` : null,
         img: imageUrl,
       };
     });
   }
 
+  async findAllAdmin() {
+    const vehicles = await this.prisma.vehicle.findMany({
+      where: { deletedAt: null },
+      include: {
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return vehicles.map((v) => ({
+      ...v,
+      tenantName: v.tenant?.name || 'Default',
+      imageData: v.imageData ? `data:image/jpeg;base64,${Buffer.from(v.imageData).toString('base64')}` : null,
+      img: v.img || DEFAULT_CAR_ICON,
+    }));
+  }
+
   async create(tenantId: string, data: { name: string; plate: string; img?: string; imageData?: Buffer }) {
+    // Ensure the tenant exists (auto-create on fresh databases)
+    await this.prisma.tenant.upsert({
+      where: { id: tenantId },
+      update: {},
+      create: { id: tenantId, name: 'Default Tenant' },
+    });
+
     return this.prisma.vehicle.create({
       data: {
         name: data.name,
@@ -48,8 +73,52 @@ export class VehiclesService {
         imageData: data.imageData,
         tenantId,
         health: 100,
-        lastService: 'À l\'instant',
+        lastService: 'A l\'instant',
       },
+    });
+  }
+
+  async update(vehicleId: string, tenantId: string, data: { name?: string; plate?: string; health?: number; lastService?: string; img?: string }) {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: { id: vehicleId, tenantId, deletedAt: null },
+    });
+    if (!vehicle) throw new NotFoundException('Vehicule non trouve');
+    return this.prisma.vehicle.update({
+      where: { id: vehicleId },
+      data,
+    });
+  }
+
+  async updateAdmin(vehicleId: string, data: { name?: string; plate?: string; health?: number; lastService?: string; img?: string }) {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: { id: vehicleId, deletedAt: null },
+    });
+    if (!vehicle) throw new NotFoundException('Vehicule non trouve');
+    return this.prisma.vehicle.update({
+      where: { id: vehicleId },
+      data,
+    });
+  }
+
+  async remove(vehicleId: string, tenantId: string) {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: { id: vehicleId, tenantId, deletedAt: null },
+    });
+    if (!vehicle) throw new NotFoundException('Vehicule non trouve');
+    return this.prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async removeAdmin(vehicleId: string) {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: { id: vehicleId, deletedAt: null },
+    });
+    if (!vehicle) throw new NotFoundException('Vehicule non trouve');
+    return this.prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: { deletedAt: new Date() },
     });
   }
 
@@ -57,7 +126,7 @@ export class VehiclesService {
     const vehicle = await this.prisma.vehicle.findFirst({
       where: { id: vehicleId, tenantId, deletedAt: null },
     });
-    if (!vehicle) throw new NotFoundException('Véhicule non trouvé');
+    if (!vehicle) throw new NotFoundException('Vehicule non trouve');
 
     const base64Data = buffer.toString('base64');
     const updated = await this.prisma.vehicle.update({
@@ -76,7 +145,7 @@ export class VehiclesService {
       where: { id: vehicleId, tenantId, deletedAt: null },
       select: { imageData: true, img: true },
     });
-    if (!vehicle || !vehicle.imageData) throw new NotFoundException('Image non trouvée');
+    if (!vehicle || !vehicle.imageData) throw new NotFoundException('Image non trouvee');
     return vehicle;
   }
 }
