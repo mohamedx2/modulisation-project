@@ -13,6 +13,13 @@ export class UniversalRoleGuard implements CanActivate {
     console.log('[UniversalRoleGuard] User:', user ? JSON.stringify({ sub: user.sub, roles: user.realm_access?.roles }) : 'null');
     console.log('[UniversalRoleGuard] accessTokenJWT:', !!request.accessTokenJWT);
 
+    const isPublic = Reflect.getMetadata('unprotected', context.getHandler()) ||
+                     Reflect.getMetadata('unprotected', context.getClass());
+    if (isPublic) {
+      console.log('[UniversalRoleGuard] Public route, skipping role check');
+      return true;
+    }
+
     if (!user) {
       console.warn('[UniversalRoleGuard] No user on request - DENIED');
       return false;

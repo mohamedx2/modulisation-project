@@ -6,8 +6,10 @@ import { TransformInterceptor } from './core/interceptors/transform.interceptor'
 import { TimeoutInterceptor } from './core/interceptors/timeout.interceptor';
 import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 import cookieParser from 'cookie-parser';
+import { initGlobalLogging } from './core/logging/in-memory.logger';
 
 async function bootstrap() {
+  initGlobalLogging();
   const app = await NestFactory.create(AppModule);
 
   // 1. Security: Set HTTP Headers

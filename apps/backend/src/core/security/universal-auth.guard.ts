@@ -22,14 +22,22 @@ export class UniversalAuthGuard extends AuthGuard {
     @Inject(KEYCLOAK_CONNECT_OPTIONS) keycloakOpts: any,
     @Inject(KEYCLOAK_LOGGER) private readonly _logger: Logger,
     @Inject(KEYCLOAK_MULTITENANT_SERVICE) multiTenant: any,
-    reflector: Reflector,
+    refl: Reflector,
     private readonly prisma: PrismaService,
   ) {
-    super(keycloak, keycloakOpts, _logger, multiTenant, reflector);
+    super(keycloak, keycloakOpts, _logger, multiTenant, refl);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    const isPublic = Reflect.getMetadata('unprotected', context.getHandler()) ||
+                     Reflect.getMetadata('unprotected', context.getClass());
+    if (isPublic) {
+      console.log('[UniversalAuthGuard] Public route, skipping auth:', request.url);
+      return true;
+    }
+
     console.log('[UniversalAuthGuard] Path:', request.url);
     console.log('[UniversalAuthGuard] Cookies:', JSON.stringify({
       access_token: request.cookies?.access_token ? 'present' : 'missing',
@@ -53,7 +61,7 @@ export class UniversalAuthGuard extends AuthGuard {
           const keycloakSub = request.user?.sub;
           const keycloakEmail = request.user?.email;
           
-          let localUser = null;
+          let localUser: { id: string; email: string; role: string; name: string | null; tenantId: string | null } | null = null;
           if (keycloakSub) {
             localUser = await this.prisma.user.findUnique({
               where: { id: keycloakSub, deletedAt: null },

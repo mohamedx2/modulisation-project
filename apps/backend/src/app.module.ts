@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import * as path from 'path';
+import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -26,14 +27,50 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { AdminModule } from './admin/admin.module';
 
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
+import { WinstonInMemoryTransport } from './core/logging/in-memory.logger';
+
 import { MetricsController } from './core/metrics/metrics.controller';
+import { LogsController } from './core/logs/logs.controller';
 import { UniversalAuthGuard } from './core/security/universal-auth.guard';
 import { UniversalRoleGuard } from './core/security/universal-role.guard';
 import { UniversalResourceGuard } from './core/security/universal-resource.guard';
+import { HttpMetricsInterceptor } from './core/metrics/http-metrics.interceptor';
+import { WinstonExceptionFilter } from './core/filters/winston-exception.filter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    WinstonModule.forRoot({
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.json(),
+      ),
+      transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({
+          filename: 'backend.log',
+          dirname: path.join(process.cwd(), 'logs'),
+          maxsize: 5242880,
+          maxFiles: 5,
+        }),
+        new WinstonInMemoryTransport(),
+      ],
+    }),
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+        config: {
+          prefix: 'nestjs_',
+        },
+      },
+      path: '/metrics',
+      controller: MetricsController,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || '127.0.0.1',
@@ -88,7 +125,7 @@ import { UniversalResourceGuard } from './core/security/universal-resource.guard
     AdminModule,
     PrismaModule,
   ],
-  controllers: [AppController, MetricsController],
+  controllers: [AppController, MetricsController, LogsController],
   providers: [
     AppService,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -96,6 +133,8 @@ import { UniversalResourceGuard } from './core/security/universal-resource.guard
     { provide: APP_GUARD, useClass: UniversalAuthGuard },
     { provide: APP_GUARD, useClass: UniversalResourceGuard },
     { provide: APP_GUARD, useClass: UniversalRoleGuard },
+    { provide: APP_INTERCEPTOR, useClass: HttpMetricsInterceptor },
+    { provide: APP_FILTER, useClass: WinstonExceptionFilter },
   ],
 })
 export class AppModule { }

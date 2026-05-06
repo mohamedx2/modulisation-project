@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, ShieldCheck, Mail, Server, Clock,
   ArrowLeft, Calendar, Car, BarChart3, 
-  Search, Trash2, RefreshCcw, LayoutDashboard
+  Search, Trash2, RefreshCcw, LayoutDashboard,
+  CreditCard, Ticket, UserPlus, CarFront
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/app/providers";
@@ -44,10 +45,23 @@ interface Vehicle {
   createdAt?: string;
 }
 
+interface ActivityEntry {
+  id: string;
+  type: string;
+  method: string;
+  path: string;
+  status: string;
+  statusCode: number;
+  timestamp: string;
+  user: string;
+  details: string;
+}
+
 interface Tenant {
   id: string;
   name?: string;
 }
+
 
 interface UserData {
   id: string;
@@ -64,26 +78,38 @@ export default function AdminDashboardPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
+  const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [dashboardStats, setDashboardStats] = useState<Record<string, unknown> | null>(null);
+  const [monitoringData, setMonitoringData] = useState<Record<string, unknown> | null>(null);
+  const [logs, setLogs] = useState<string[]>([]);
+  const [isMonitoringLoading, setIsMonitoringLoading] = useState(true);
+  const [latencyHistory, setLatencyHistory] = useState<number[]>([]);
+  const [logFilter, setLogFilter] = useState<string>("all");
+  const logsContainerRef = useRef<HTMLDivElement>(null);
+
+  const GRAFANA_URL = "http://localhost:3100";
 
   const loadAdminData = async () => {
     try {
       setIsLoading(true);
-      const [resData, vehData, dashboardData, usersData] = await Promise.all([
+      const [resData, vehData, dashboardData, usersData, activityData] = await Promise.all([
         fetchWithAuth("/admin/tickets"),
         fetchWithAuth("/admin/vehicles"),
         fetchWithAuth("/admin/dashboard"),
-        fetchWithAuth("/admin/users")
+        fetchWithAuth("/admin/users"),
+        fetchWithAuth("/admin/activity"),
       ]);
 
       setTimeout(() => {
         setReservations(Array.isArray(resData) ? resData : (resData?.data && Array.isArray(resData.data) ? resData.data : []));
         setVehicles(Array.isArray(vehData) ? vehData : (vehData?.data && Array.isArray(vehData.data) ? vehData.data : []));
         setUsers(Array.isArray(usersData) ? usersData : (usersData?.data && Array.isArray(usersData.data) ? usersData.data : []));
-        if (dashboardData && typeof dashboardData === 'object' && 'stats' in dashboardData) {
-          setDashboardStats(dashboardData.stats as Record<string, unknown>);
+        setActivities(Array.isArray(activityData) ? activityData : (activityData?.data && Array.isArray(activityData.data) ? activityData.data : []));
+        const unwrappedDashboard = dashboardData?.data || dashboardData;
+        if (unwrappedDashboard && typeof unwrappedDashboard === 'object' && 'stats' in unwrappedDashboard) {
+          setDashboardStats(unwrappedDashboard.stats as Record<string, unknown>);
         }
         setIsLoading(false);
       }, 0);
@@ -93,10 +119,51 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const loadMonitoringData = async () => {
+    try {
+      setIsMonitoringLoading(true);
+      const metricsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/metrics/summary`);
+      const metricsJson = await metricsRes.json();
+      console.log('[Monitoring] Raw metrics response:', metricsJson);
+      console.log('[Monitoring] Unwrapped data:', metricsJson.data || metricsJson);
+      const data = metricsJson.data || metricsJson;
+      setMonitoringData(data);
+      setLatencyHistory((prev) => {
+        const next = [...prev, (data.avgResponseTime as number) || 0];
+        if (next.length > 45) next.shift();
+        return next;
+      });
+
+      const logsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/logs`);
+      if (logsRes.ok) {
+        const logsJson = await logsRes.json();
+        setLogs((logsJson.data?.logs || logsJson.logs || []) as string[]);
+      }
+    } catch (err) {
+      console.error("Failed to load monitoring data:", err);
+    } finally {
+      setIsMonitoringLoading(false);
+    }
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAdminData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "monitoring") {
+      loadMonitoringData();
+      const interval = setInterval(loadMonitoringData, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   const TABS: { id: TabType; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard },
@@ -174,9 +241,9 @@ export default function AdminDashboardPage() {
                       <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 py-1.5 rounded-full font-black uppercase text-[9px] tracking-widest">
                         Core Online
                       </Badge>
-                      <span className="text-white/60 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> Uptime: 1,248 Hours
-                      </span>
+                       <span className="text-white/60 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse inline-block" /> {reservations.length} Active Tickets
+                       </span>
                     </div>
                 </div>
                 <div className="flex gap-4">
@@ -224,23 +291,29 @@ export default function AdminDashboardPage() {
                       </div>
                       <Badge variant="outline" className="border-primary/20 text-primary font-black uppercase tracking-widest">Live Node</Badge>
                    </div>
-                    <div className="space-y-6 font-mono text-xs">
-                       {reservations.slice(0, 8).map((ticket) => (
-                         <div key={ticket.id} className="flex gap-6 text-white/60 border-b border-white/5 pb-4 last:border-none">
-                            <span className="text-primary font-black">[{new Date(ticket.createdAt || Date.now()).toLocaleTimeString('fr-FR')}]</span>
-                            <span className="text-white font-bold uppercase w-20">POST</span>
-                            <span className="text-white/40 flex-1">/tickets</span>
-                            <span className="italic hidden md:block w-32 truncate">{ticket.creator?.name || ticket.createdBy || "N/A"}</span>
-                            <span className="text-emerald-400 font-black">201</span>
-                            <span className="text-white/40 hidden md:block">{ticket.title || "-"}</span>
-                         </div>
-                       ))}
-                       {reservations.length === 0 && (
-                         <div className="text-center py-8 text-white/30 text-[10px] font-black uppercase tracking-widest">
-                           No recent activity
-                         </div>
-                       )}
-                    </div>
+                     <div className="space-y-6 font-mono text-xs">
+                        {activities.slice(0, 12).map((entry) => {
+                          const methodColor = entry.method === 'POST' ? 'text-emerald-400' : entry.method === 'PATCH' ? 'text-amber-400' : 'text-blue-400';
+                          const statusColor = entry.statusCode >= 500 ? 'text-red-400' : entry.statusCode >= 400 ? 'text-amber-400' : 'text-emerald-400';
+                          const TypeIcon = entry.type === 'ticket' ? Ticket : entry.type === 'vehicle' ? CarFront : entry.type === 'payment' ? CreditCard : UserPlus;
+                          return (
+                            <div key={`${entry.id}-${entry.type}`} className="flex gap-4 text-white/60 border-b border-white/5 pb-3 last:border-none items-center group hover:bg-white/[0.02] px-2 -mx-2 rounded-lg transition-colors">
+                               <span className="text-white/15 shrink-0"><TypeIcon className="w-3.5 h-3.5" /></span>
+                               <span className="text-primary font-black shrink-0">[{new Date(entry.timestamp).toLocaleTimeString('fr-FR')}]</span>
+                               <span className={`${methodColor} font-bold uppercase w-14 shrink-0`}>{entry.method}</span>
+                               <span className="text-white/40 flex-1 truncate">{entry.path}</span>
+                               <span className="italic hidden md:block w-28 truncate text-white/50">{entry.user}</span>
+                               <span className={`${statusColor} font-black shrink-0`}>{entry.statusCode}</span>
+                               <span className="text-white/30 hidden lg:block w-32 truncate text-[10px]">{entry.details}</span>
+                            </div>
+                          );
+                        })}
+                        {activities.length === 0 && (
+                          <div className="text-center py-8 text-white/30 text-[10px] font-black uppercase tracking-widest">
+                            No recent activity
+                          </div>
+                        )}
+                     </div>
                 </Card>
 
                 <Card className="rounded-[3rem] border-white/10 bg-white/[0.03] backdrop-blur-xl p-12 space-y-8">
@@ -626,110 +699,206 @@ export default function AdminDashboardPage() {
                  <div>
                    <h2 className="text-4xl font-black uppercase italic tracking-tighter text-white">Prometheus & <span className="text-primary italic">Grafana</span></h2>
                    <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mt-2 flex items-center gap-2">
-                     <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" /> Live Infrastructure Feed - Core v4.0
+                     <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse block" /> Live Infrastructure Feed - Core v4.0
                    </p>
                  </div>
                  <div className="flex gap-4">
-                    <Button variant="outline" className="h-14 rounded-2xl border-white/10 bg-orange-500/10 text-orange-400 font-black uppercase text-[10px] tracking-widest px-8">
+                    <Button 
+                      variant="outline" 
+                      className="h-14 rounded-2xl border-white/10 bg-orange-500/10 text-orange-400 font-black uppercase text-[10px] tracking-widest px-8"
+                      onClick={() => window.open(GRAFANA_URL, '_blank')}
+                    >
                       Open Grafana &nearrow;
                     </Button>
-                    <Button className="h-14 rounded-2xl bg-primary text-black font-black uppercase text-[10px] tracking-widest px-8 shadow-xl shadow-primary/20">
-                      Sync Metrics
+                    <Button 
+                      className="h-14 rounded-2xl bg-primary text-black font-black uppercase text-[10px] tracking-widest px-8 shadow-xl shadow-primary/20"
+                      onClick={loadMonitoringData}
+                    >
+                      <RefreshCcw className={`w-4 h-4 mr-2 ${isMonitoringLoading ? "animate-spin" : ""}`} /> Sync Metrics
                     </Button>
                  </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2 rounded-[3rem] border-white/10 bg-[#080808] overflow-hidden p-12 relative group border-none shadow-2xl">
-                  <div className="flex justify-between items-center mb-12">
-                    <h3 className="font-black uppercase tracking-widest text-[11px] text-white/40">Request Latency (ms) - Global Prometheus Feed</h3>
-                    <div className="flex items-center gap-6 text-[9px] font-black tracking-widest uppercase">
-                       <span className="flex items-center gap-2"><div className="w-2 h-2 bg-primary rounded-full" /> API Gateway</span>
-                       <span className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-400 rounded-full" /> Auth Engine</span>
-                    </div>
-                  </div>
-                   <div className="h-64 w-full flex items-end gap-2 mb-10">
-                     {Array.from({ length: 45 }, (_, i) => {
-                       const height = 20 + (i * 1.5) % 80;
-                       return (
-                         <div key={i} className="flex-1 flex flex-col justify-end gap-1 group/bar h-full">
-                            <motion.div 
-                              initial={{ height: 0 }}
-                              animate={{ height: `${height}%` }}
-                              className={`w-full rounded-t-sm transition-all duration-700 ${
-                                height > 85 ? "bg-red-500/50" : i % 3 === 0 ? "bg-blue-400/50" : "bg-primary/50"
-                              } group-hover/bar:bg-primary opacity-80`}
-                            />
-                         </div>
-                       );
-                     })}
-                  </div>
-                  <div className="grid grid-cols-4 gap-8 pt-10 border-t border-white/5">
-                     {[
-                       { label: "P99 LATENCY", value: "142ms", color: "text-red-400" },
-                       { label: "THROUGHPUT", value: "1.2k rps", color: "text-primary" },
-                       { label: "ERROR RATE", value: "0.02%", color: "text-emerald-400" },
-                       { label: "UPTIME", value: "99.99%", color: "text-emerald-400" },
-                     ].map((m, i) => (
-                       <div key={i}>
-                         <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">{m.label}</p>
-                         <p className={`text-2xl font-black italic uppercase tracking-tighter ${m.color}`}>{m.value}</p>
-                       </div>
-                     ))}
-                  </div>
-                </Card>
-
-                <Card className="rounded-[3rem] border-white/10 bg-[#080808] p-12 space-y-12 border-none shadow-2xl">
-                   <h3 className="font-black uppercase tracking-widest text-[11px] text-white/40 text-center">Memory Allocation Gauge</h3>
-                   <div className="relative w-56 h-56 mx-auto">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="8" />
-                        <motion.circle 
-                          cx="50" cy="50" r="45" fill="none" stroke="#FFCB05" strokeWidth="8" 
-                          strokeDasharray="283"
-                          initial={{ strokeDashoffset: 283 }}
-                          animate={{ strokeDashoffset: 283 - (283 * 0.74) }}
-                          transition={{ duration: 2.5, ease: "circOut" }}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                         <span className="text-6xl font-black italic text-white">74<span className="text-2xl text-primary">%</span></span>
-                         <span className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-1">Utilization</span>
-                      </div>
-                   </div>
-                   <div className="space-y-5 pt-4">
-                      {[
-                        { label: "PostgreSQL Pool", val: "12.4GB", color: "bg-primary" },
-                        { label: "Redis Cluster", val: "4.1GB", color: "bg-blue-400" },
-                        { label: "NestJS Memory", val: "32.8GB", color: "bg-emerald-400" },
-                      ].map((item, i) => (
-                        <div key={i} className="flex justify-between items-center text-[11px] font-black uppercase tracking-tight">
-                           <div className="flex items-center gap-3 text-white/50">
-                             <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                             {item.label}
-                           </div>
-                           <span className="text-white">{item.val}</span>
+              {isMonitoringLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-white/40 text-[10px] font-black uppercase tracking-widest animate-pulse">Loading metrics...</div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <Card className="lg:col-span-2 rounded-[3rem] border-white/10 bg-[#080808] overflow-hidden p-12 relative group border-none shadow-2xl">
+                      <div className="flex justify-between items-center mb-12">
+                        <h3 className="font-black uppercase tracking-widest text-[11px] text-white/40">Request Latency (ms) - Global Prometheus Feed</h3>
+                        <div className="flex items-center gap-6 text-[9px] font-black tracking-widest uppercase">
+                           <span className="flex items-center gap-2"><span className="w-2 h-2 bg-primary rounded-full inline-block" /> API Gateway</span>
+                           <span className="flex items-center gap-2"><span className="w-2 h-2 bg-blue-400 rounded-full inline-block" /> Auth Engine</span>
                         </div>
-                      ))}
-                   </div>
-                </Card>
-              </div>
+                      </div>
+                       <div className="h-64 w-full flex items-end gap-2 mb-10">
+                         {Array.from({ length: 45 }, (_, i) => {
+                           const value = latencyHistory[i] || 0;
+                           const maxLatency = Math.max(...latencyHistory, 1);
+                           const height = latencyHistory.length > 0 ? (value / maxLatency) * 100 : 20;
+                           return (
+                             <div key={i} className="flex-1 flex flex-col justify-end gap-1 group/bar h-full">
+                                <motion.div 
+                                  initial={{ height: 0 }}
+                                  animate={{ height: `${height}%` }}
+                                  className={`w-full rounded-t-sm transition-all duration-700 ${
+                                    height > 85 ? "bg-red-500/50" : i % 3 === 0 ? "bg-blue-400/50" : "bg-primary/50"
+                                  } group-hover/bar:bg-primary opacity-80`}
+                                />
+                             </div>
+                           );
+                         })}
+                      </div>
+                      <div className="grid grid-cols-4 gap-8 pt-10 border-t border-white/5">
+                         {[
+                           { label: "AVG RESPONSE", value: `${((monitoringData?.avgResponseTime as number) || 0).toFixed(1)}ms`, color: "text-red-400" },
+                           { label: "TOTAL REQUESTS", value: (monitoringData?.totalRequests as number)?.toLocaleString() || "0", color: "text-primary" },
+                           { label: "ERROR RATE", value: `${((monitoringData?.errorRate as number) || 0).toFixed(2)}%`, color: (monitoringData?.errorRate as number || 0) > 5 ? "text-red-400" : "text-emerald-400" },
+                           { label: "UPTIME", value: `${(((monitoringData?.uptime as number) || 0) / 3600).toFixed(1)}h`, color: "text-emerald-400" },
+                         ].map((m, i) => (
+                           <div key={i}>
+                             <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">{m.label}</p>
+                             <p className={`text-2xl font-black italic uppercase tracking-tighter ${m.color}`}>{m.value}</p>
+                           </div>
+                         ))}
+                      </div>
+                    </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {["EU-WEST-1", "EU-CENTRAL-1", "US-EAST-1", "AP-SOUTH-1"].map((region, i) => (
-                  <Card key={i} className="rounded-3xl border-white/10 bg-white/5 p-8 hover:border-primary/40 transition-all cursor-pointer group">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{region}</span>
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.4)]" />
+                    <Card className="rounded-[3rem] border-white/10 bg-[#080808] p-12 space-y-12 border-none shadow-2xl">
+                       <h3 className="font-black uppercase tracking-widest text-[11px] text-white/40 text-center">Memory Allocation Gauge</h3>
+                       <div className="relative w-56 h-56 mx-auto">
+                          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="8" />
+                            <motion.circle 
+                              cx="50" cy="50" r="45" fill="none" stroke="#FFCB05" strokeWidth="8" 
+                              strokeDasharray="283"
+                              initial={{ strokeDashoffset: 283 }}
+                              animate={{ strokeDashoffset: 283 - (283 * (Math.min(((monitoringData?.memoryUsage as number) || 0) / (512 * 1024 * 1024), 1))) }}
+                              transition={{ duration: 2.5, ease: "circOut" }}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                             <span className="text-6xl font-black italic text-white">{Math.round(((monitoringData?.memoryUsage as number) || 0) / (1024 * 1024))}<span className="text-2xl text-primary">MB</span></span>
+                             <span className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-1">Heap Used</span>
+                          </div>
+                       </div>
+                       <div className="space-y-5 pt-4">
+                          {[
+                            { label: "CPU Usage", val: `${((monitoringData?.cpuUsage as number) || 0).toFixed(1)}s`, color: "bg-primary" },
+                            { label: "Node Version", val: (monitoringData?.nodeVersion as string) || "N/A", color: "bg-blue-400" },
+                            { label: "Error Rate", val: `${((monitoringData?.errorRate as number) || 0).toFixed(2)}%`, color: (monitoringData?.errorRate as number || 0) > 5 ? "bg-red-400" : "bg-emerald-400" },
+                          ].map((item, i) => (
+                            <div key={i} className="flex justify-between items-center text-[11px] font-black uppercase tracking-tight">
+                               <div className="flex items-center gap-3 text-white/50">
+                                 <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                                 {item.label}
+                               </div>
+                               <span className="text-white">{item.val}</span>
+                            </div>
+                          ))}
+                       </div>
+                    </Card>
+                  </div>
+
+                  <Card className="rounded-[3rem] border-white/10 bg-[#080808] p-12 border-none shadow-2xl">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                      <div>
+                        <h3 className="font-black uppercase tracking-widest text-[11px] text-white/40">Application Logs</h3>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mt-1">Real-time stream via Winston</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {["all", "error", "warn", "info"].map((filter) => (
+                          <button
+                            key={filter}
+                            onClick={() => setLogFilter(filter)}
+                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                              logFilter === filter
+                                ? filter === "error" ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                                  : filter === "warn" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                                  : filter === "info" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                                  : "bg-primary/20 text-primary border border-primary/30"
+                                : "bg-white/5 text-white/30 border border-white/10 hover:text-white/50"
+                            }`}
+                          >
+                            {filter}
+                          </button>
+                        ))}
+                        <div className="flex items-center gap-2 ml-2 text-[9px] font-black tracking-widest uppercase text-emerald-400">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" /> Live
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-end justify-between">
-                       <span className="text-3xl font-black italic text-white tracking-tighter">{12 + i * 4}ms</span>
-                       <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Active</span>
+                    <div ref={logsContainerRef} className="bg-black/50 rounded-2xl p-6 font-mono text-xs max-h-72 overflow-y-auto space-y-1">
+                      {isMonitoringLoading ? (
+                        <div className="space-y-3">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="animate-pulse flex gap-3">
+                              <span className="w-20 h-3 bg-white/5 rounded" />
+                              <span className="flex-1 h-3 bg-white/5 rounded" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : logs.length > 0 ? (
+                        logs
+                          .filter((log) => {
+                            if (logFilter === "all") return true;
+                            return log.toLowerCase().includes(`[${logFilter}]`);
+                          })
+                          .map((log, i) => {
+                            const isError = log.toLowerCase().includes("[error]");
+                            const isWarn = log.toLowerCase().includes("[warn]");
+                            return (
+                              <div key={i} className={`flex gap-4 py-2 px-3 rounded-lg transition-colors hover:bg-white/[0.02] ${
+                                isError ? "text-red-400/80" : isWarn ? "text-amber-400/80" : "text-white/50"
+                              }`}>
+                                <span className="text-white/20 shrink-0 select-none">{String(i + 1).padStart(3, "0")}</span>
+                                <span className="break-all">{log}</span>
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <Server className="w-12 h-12 text-white/10 mb-4" />
+                          <p className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-2">No Logs Yet</p>
+                          <p className="text-white/15 text-[9px] font-black uppercase tracking-widest max-w-xs">
+                            Logs will appear here as your backend processes requests. Make sure the server is running.
+                          </p>
+                        </div>
+                      )}
                     </div>
+                    {logs.length > 0 && (
+                      <div className="flex justify-between items-center mt-4 text-[9px] font-black uppercase tracking-widest text-white/20">
+                        <span>{logs.length} entries</span>
+                        <button
+                          onClick={() => { setLogs([]); loadMonitoringData(); }}
+                          className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                        >
+                          Refresh
+                        </button>
+                      </div>
+                    )}
                   </Card>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    {["Prometheus", "Grafana", "Loki", "Backend"].map((service, i) => (
+                      <Card key={i} className="rounded-3xl border-white/10 bg-white/5 p-8 hover:border-primary/40 transition-all cursor-pointer group">
+                        <div className="flex justify-between items-center mb-6">
+                          <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{service}</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.4)]" />
+                        </div>
+                        <div className="flex items-end justify-between">
+                           <span className="text-3xl font-black italic text-white tracking-tighter">{["9090", "3100", "3101", "3001"][i]}</span>
+                           <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Active</span>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
