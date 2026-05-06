@@ -24,6 +24,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { AdminModule } from './admin/admin.module';
 
 import { MetricsController } from './core/metrics/metrics.controller';
 import { UniversalAuthGuard } from './core/security/universal-auth.guard';
@@ -84,6 +85,7 @@ import { UniversalResourceGuard } from './core/security/universal-resource.guard
     PaymentsModule,
     DashboardModule,
     VehiclesModule,
+    AdminModule,
     PrismaModule,
   ],
   controllers: [AppController, MetricsController],

@@ -1,77 +1,71 @@
-import {
-  Injectable,
-  ExecutionContext,
-  Inject,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import {
-  RoleGuard,
-  KEYCLOAK_INSTANCE,
-  KEYCLOAK_CONNECT_OPTIONS,
-  KEYCLOAK_LOGGER,
-  KEYCLOAK_MULTITENANT_SERVICE,
-} from 'nest-keycloak-connect';
 
 @Injectable()
-export class UniversalRoleGuard extends RoleGuard {
-  constructor(
-    @Inject(KEYCLOAK_INSTANCE) keycloak: any,
-    @Inject(KEYCLOAK_CONNECT_OPTIONS) keycloakOpts: any,
-    @Inject(KEYCLOAK_LOGGER) private readonly _logger: Logger,
-    @Inject(KEYCLOAK_MULTITENANT_SERVICE) multiTenant: any,
-    private readonly _reflector: Reflector,
-  ) {
-    super(keycloak, keycloakOpts, _logger, multiTenant, _reflector);
-  }
+export class UniversalRoleGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
+    const user = request.user;
 
-    // If we have a Keycloak JWT, use the standard RoleGuard
-    if (request.accessTokenJWT) {
-      return super.canActivate(context);
+    console.log('[UniversalRoleGuard] Path:', request.url);
+    console.log('[UniversalRoleGuard] User:', user ? JSON.stringify({ sub: user.sub, roles: user.realm_access?.roles }) : 'null');
+    console.log('[UniversalRoleGuard] accessTokenJWT:', !!request.accessTokenJWT);
+
+    if (!user) {
+      console.warn('[UniversalRoleGuard] No user on request - DENIED');
+      return false;
     }
 
-    // Local Fallback: If we have a mock user populated by UniversalAuthGuard
-    if (request.user && !request.accessTokenJWT) {
-      try {
-        // Logic from RoleGuard: get roles from decorators
-        const rolesData = this._reflector.getAllAndMerge('roles', [
-          context.getClass(),
-          context.getHandler(),
-        ]);
+    const rolesData = this.reflector.getAllAndMerge('roles', [
+      context.getClass(),
+      context.getHandler(),
+    ]);
 
-        if (!rolesData) {
-          return true;
-        }
+    console.log('[UniversalRoleGuard] Raw rolesData:', JSON.stringify(rolesData));
 
-        const rolesArray = Array.isArray(rolesData) ? rolesData : [rolesData];
-        const userRoles = request.user.realm_access?.roles || [];
-        const requiredRoles = rolesArray.flatMap((r: any) => r?.roles || []);
+    if (!rolesData) {
+      console.log('[UniversalRoleGuard] No @Roles decorator - ALLOWED');
+      return true;
+    }
 
-        this._logger.verbose(`Checking roles for local user. User roles: ${userRoles.join(', ')}. Required: ${requiredRoles.join(', ')}`);
+    const rolesArray = Array.isArray(rolesData) ? rolesData : [rolesData];
+    const requiredRoles = rolesArray.flatMap((r: any) => r?.roles || []);
 
-        // Simple matching: ANY of the required roles
-        const hasRole = requiredRoles.some((role: string) => 
-          userRoles.includes(role) || 
-          userRoles.includes(role.toLowerCase()) ||
-          userRoles.map((ur: string) => ur.toLowerCase()).includes(role.toLowerCase())
-        );
+    console.log('[UniversalRoleGuard] Required roles:', requiredRoles);
 
-        if (hasRole) {
-          this._logger.verbose(`Local resource granted due to role(s)`);
-          return true;
-        }
+    if (requiredRoles.length === 0) {
+      console.log('[UniversalRoleGuard] Empty required roles - ALLOWED');
+      return true;
+    }
 
-        this._logger.verbose(`Local resource denied due to mismatched role(s)`);
-        return false;
-      } catch (err) {
-        this._logger.error(`Local role check crashed: ${err.message}`, err.stack);
-        return false; // Fail safe
+    const userRoles: string[] = user.realm_access?.roles || [];
+    const userRolesLower = userRoles.map((r: string) => r.toLowerCase());
+
+    const hasRole = requiredRoles.some((role: string) => {
+      const roleBase = role.replace(/^realm:/i, '').toLowerCase();
+
+      const match = 
+        userRoles.includes(role) ||
+        userRoles.includes(role.toLowerCase()) ||
+        userRoles.includes(role.toUpperCase()) ||
+        userRolesLower.includes(role.toLowerCase()) ||
+        userRolesLower.includes(roleBase) ||
+        userRoles.map((r: string) => r.toLowerCase()).includes(roleBase);
+      
+      if (match) {
+        console.log(`[UniversalRoleGuard] Role match: "${role}" (base: "${roleBase}") found in user roles`);
       }
+      return match;
+    });
+
+    if (!hasRole) {
+      console.warn(`[UniversalRoleGuard] DENIED. User has: [${userRoles.join(', ')}]. Required: [${requiredRoles.join(', ')}]`);
+    } else {
+      console.log('[UniversalRoleGuard] ALLOWED');
     }
 
-    return super.canActivate(context);
+    return hasRole;
   }
 }

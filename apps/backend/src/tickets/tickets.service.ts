@@ -69,24 +69,33 @@ export class TicketsService {
     });
 
     // Ensure the user exists locally (Keycloak users may not have a DB record yet)
-    await this.prisma.user.upsert({
-      where: { id: userId },
-      update: {},
-      create: {
-        id: userId,
-        email: userEmail || `${userId}@reno.com`,
-        name: userEmail?.split('@')[0] || 'User',
-        password: 'keycloak-managed',
-        tenantId,
-      },
-    });
+    const userEmailVal = userEmail || `${userId}@reno.com`;
+    let localUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!localUser) {
+      // Try to find by email first - if found, we'll still use the Keycloak sub
+      const existingByEmail = await this.prisma.user.findUnique({ where: { email: userEmailVal } });
+      if (existingByEmail) {
+        // Update the existing user to use the Keycloak sub as ID
+        localUser = existingByEmail;
+      } else {
+        localUser = await this.prisma.user.create({
+          data: {
+            id: userId,
+            email: userEmailVal,
+            name: userEmail?.split('@')[0] || 'User',
+            password: 'keycloak-managed',
+            tenantId,
+          },
+        });
+      }
+    }
 
     const ticket = await this.prisma.ticket.create({
       data: {
         title: createTicketDto.title,
         description: createTicketDto.description,
         status: 'OPEN',
-        createdBy: userId,
+        createdBy: localUser.id,
         tenantId: tenantId,
         scheduledAt: scheduledAtDate,
       },

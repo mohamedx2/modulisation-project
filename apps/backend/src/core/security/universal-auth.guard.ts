@@ -30,49 +30,102 @@ export class UniversalAuthGuard extends AuthGuard {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    this._logger.verbose(`Checking authentication for path: ${request.url}`);
+    console.log('[UniversalAuthGuard] Path:', request.url);
+    console.log('[UniversalAuthGuard] Cookies:', JSON.stringify({
+      access_token: request.cookies?.access_token ? 'present' : 'missing',
+      user_id: request.cookies?.user_id ? 'present' : 'missing',
+    }));
 
     // 1. Try Keycloak validation first
     try {
-      this._logger.verbose('Attempting Keycloak authentication...');
+      console.log('[UniversalAuthGuard] Attempting Keycloak authentication...');
       const result = await super.canActivate(context);
-      if (result) {
-        this._logger.verbose('Keycloak authentication successful');
+      console.log('[UniversalAuthGuard] Keycloak canActivate returned:', result);
+      
+      if (result && request.user) {
+        console.log('[UniversalAuthGuard] Keycloak user:', JSON.stringify({
+          sub: request.user?.sub,
+          roles: request.user?.realm_access?.roles,
+        }));
+
+        // Enrich with local DB role
+        try {
+          const keycloakSub = request.user?.sub;
+          const keycloakEmail = request.user?.email;
+          
+          let localUser = null;
+          if (keycloakSub) {
+            localUser = await this.prisma.user.findUnique({
+              where: { id: keycloakSub, deletedAt: null },
+            });
+          }
+          // Fallback: find by email
+          if (!localUser && keycloakEmail) {
+            localUser = await this.prisma.user.findUnique({
+              where: { email: keycloakEmail, deletedAt: null },
+            });
+          }
+
+          if (localUser) {
+            console.log('[UniversalAuthGuard] Found local user:', localUser.email, 'role:', localUser.role);
+            const roleLower = localUser.role.toLowerCase();
+            const roleUpper = localUser.role.toUpperCase();
+
+            const existingRoles = request.user?.realm_access?.roles || [];
+            const mergedRoles = new Set(existingRoles);
+
+            mergedRoles.add(roleLower);
+            mergedRoles.add(roleUpper);
+            mergedRoles.add(`realm:${roleLower}`);
+            mergedRoles.add(`realm:${roleUpper}`);
+            mergedRoles.add('realm:default-roles-reno');
+
+            if (roleLower === 'admin' || roleLower === 'super_admin') {
+              mergedRoles.add('realm:SUPER_ADMIN');
+              mergedRoles.add('realm:super_admin');
+              mergedRoles.add('SUPER_ADMIN');
+              mergedRoles.add('ADMIN');
+            }
+
+            request.user.realm_access = { roles: Array.from(mergedRoles) };
+            console.log('[UniversalAuthGuard] Enriched roles:', request.user.realm_access.roles);
+          } else {
+            console.log('[UniversalAuthGuard] No local DB user found for sub:', keycloakSub, 'or email:', keycloakEmail);
+          }
+        } catch (enrichErr) {
+          console.warn('[UniversalAuthGuard] DB enrichment failed:', enrichErr.message);
+        }
+
         return true;
       }
     } catch (e) {
-      this._logger.warn(`Keycloak auth failed: ${e.message}`);
-      // If it's a 401/403, we continue to local check. 
-      // If it's something else, we might want to know.
+      console.warn('[UniversalAuthGuard] Keycloak auth failed:', e.message);
     }
 
     // 2. Local Fallback: Check cookies for user_id
     try {
       const userId = request.cookies?.user_id;
       if (userId) {
-        this._logger.verbose(`Found user_id cookie: ${userId}, checking database...`);
+        console.log('[UniversalAuthGuard] Local fallback: user_id cookie:', userId);
         const user = await this.prisma.user.findUnique({
           where: { id: userId, deletedAt: null },
         });
 
         if (user) {
-          this._logger.verbose(`Local user found: ${user.email} (${user.role})`);
-          const roleLower = user.role.toLowerCase(); // e.g. 'admin'
-          const roleUpper = user.role.toUpperCase(); // e.g. 'ADMIN'
+          console.log('[UniversalAuthGuard] Local user found:', user.email, 'role:', user.role);
+          const roleLower = user.role.toLowerCase();
+          const roleUpper = user.role.toUpperCase();
 
-          // Build a comprehensive set of role aliases so this user matches
-          // any @Roles() decorator variation used across the controllers.
           const roles = [
-            roleLower,                  // 'admin'
-            roleUpper,                  // 'ADMIN'
-            `realm:${roleLower}`,       // 'realm:admin'
-            `realm:${roleUpper}`,       // 'realm:ADMIN'
-            'realm:default-roles-reno', // Keycloak default role
+            roleLower,
+            roleUpper,
+            `realm:${roleLower}`,
+            `realm:${roleUpper}`,
+            'realm:default-roles-reno',
           ];
 
-          // ADMIN users also get SUPER_ADMIN so they can pass any admin check
-          if (roleLower === 'admin') {
-            roles.push('realm:SUPER_ADMIN', 'realm:super_admin', 'SUPER_ADMIN');
+          if (roleLower === 'admin' || roleLower === 'super_admin') {
+            roles.push('realm:SUPER_ADMIN', 'realm:super_admin', 'SUPER_ADMIN', 'ADMIN');
           }
 
           request.user = {
@@ -84,14 +137,13 @@ export class UniversalAuthGuard extends AuthGuard {
           };
           return true;
         }
-        this._logger.verbose('No local user found for this user_id');
       }
     } catch (dbError) {
-      this._logger.error(`Database fallback failed: ${dbError.message}`, dbError.stack);
-      throw dbError; // Rethrow DB errors as they are real 500s
+      console.error('[UniversalAuthGuard] DB fallback failed:', dbError.message);
+      throw dbError;
     }
 
-    this._logger.verbose('Authentication failed: No valid Keycloak token or local session');
+    console.warn('[UniversalAuthGuard] Authentication failed');
     throw new UnauthorizedException('Not authenticated');
   }
 }

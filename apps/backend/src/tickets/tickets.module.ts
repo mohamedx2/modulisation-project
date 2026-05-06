@@ -8,5 +8,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
   imports: [MailerModule, PrismaModule],
   providers: [TicketsService],
   controllers: [TicketsController],
+  exports: [TicketsService],
 })
 export class TicketsModule {}

@@ -23,7 +23,9 @@ export default function LoginPage() {
     
     try {
       const user = await login(username, password);
-      if (user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") {
+      console.log('[Login] User role:', user?.role);
+      const role = user?.role?.toUpperCase();
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
         window.location.replace("/adminDashboard");
       } else {
         window.location.replace("/dashboard");

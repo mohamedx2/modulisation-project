@@ -21,6 +21,15 @@ export default function DashboardOverview() {
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
+    if (user && !loading) {
+      const role = user.role?.toUpperCase();
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
+        router.replace("/adminDashboard");
+      }
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
     async function loadData() {
       if (!user) return;
       try {

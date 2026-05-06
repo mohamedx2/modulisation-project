@@ -42,6 +42,28 @@ export class AuthController {
     }
   }
 
+  @Post('signup-admin')
+  async signupAdmin(
+    @Body() body: { email: string; password: string; firstName: string; lastName: string; role?: 'ADMIN' | 'SUPER_ADMIN' },
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.authService.signup(
+        body.email,
+        body.password,
+        body.firstName,
+        body.lastName,
+        body.role || 'ADMIN',
+      );
+      return res.status(201).json(result);
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Failed to create admin account');
+    }
+  }
+
   @Post('logout')
   async logout(@Res() res: Response) {
     const result = await this.authService.logout(res);

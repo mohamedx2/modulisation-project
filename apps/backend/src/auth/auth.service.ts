@@ -15,6 +15,7 @@ export class AuthService {
   }
 
   async login(username: string, password: string, res: Response) {
+    // Load environment variables
     const keycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
     const realm = process.env.KEYCLOAK_REALM || 'reno';
     const clientId = process.env.KEYCLOAK_CLIENT_ID || 'backend';
@@ -27,11 +28,12 @@ export class AuthService {
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: 'password',
-        username,
-        password,
+        username: username.trim(),
+        password: password.trim(),
       });
 
       console.log(`[AuthService] Attempting Keycloak login for: ${username} at ${tokenUrl}`);
+      console.log(`[AuthService] Using client_id: ${clientId}, client_secret (first 10 chars): ${clientSecret.substring(0, 10)}...`);
       
       const response = await fetch(tokenUrl, {
         method: 'POST',
@@ -49,15 +51,22 @@ export class AuthService {
         const email = username.includes('@') ? username : `${username}@reno.com`;
         const name = jwtPayload.name || jwtPayload.preferred_username || username;
 
+        const existingUser = await this.prisma.user.findUnique({ where: { email } });
+        const currentRole = existingUser?.role as string;
+        
+        const roleToUse = (currentRole === 'ADMIN' || currentRole === 'SUPER_ADMIN') && mappedRole === 'USER'
+          ? currentRole
+          : mappedRole;
+
         const user = await this.prisma.user.upsert({
           where: { email },
-          update: { name, role: mappedRole as any },
+          update: { name, role: roleToUse as any },
           create: {
             id: jwtPayload.sub,
             email,
             name,
             password: 'authenticated',
-            role: mappedRole as any,
+            role: roleToUse as any,
           },
         });
 
@@ -202,7 +211,8 @@ export class AuthService {
     };
   }
 
-  async signup(email: string, password: string, firstName: string, lastName: string) {
+  async signup(email: string, password: string, firstName: string, lastName: string, role?: 'USER' | 'ADMIN' | 'MECHANIC' | 'SUPER_ADMIN') {
+    const userRole = role || 'USER';
     const keycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
     const realm = process.env.KEYCLOAK_REALM || 'reno';
     const adminUser = process.env.KEYCLOAK_ADMIN || 'admin';
@@ -278,19 +288,34 @@ export class AuthService {
     }
 
     if (keycloakUserId) {
-      const userRoleResponse = await fetch(`${keycloakUrl}/admin/realms/${realm}/users/${keycloakUserId}/role-mappings/realm`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify([
-          { id: 'user-role-id', name: 'user' },
-        ]),
+      const roleName = userRole.toLowerCase();
+      
+      const rolesResponse = await fetch(`${keycloakUrl}/admin/realms/${realm}/roles/${roleName}`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` },
       });
+      
+      if (rolesResponse.ok) {
+        const roleData = await rolesResponse.json();
+        console.log(`[AuthService] Found Keycloak role '${roleName}' with id: ${roleData.id}`);
+        
+        const userRoleResponse = await fetch(`${keycloakUrl}/admin/realms/${realm}/users/${keycloakUserId}/role-mappings/realm`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`,
+          },
+          body: JSON.stringify([
+            { id: roleData.id, name: roleData.name },
+          ]),
+        });
 
-      if (!userRoleResponse.ok) {
-        console.warn('[AuthService] Could not assign default role to new user');
+        if (!userRoleResponse.ok) {
+          console.warn(`[AuthService] Could not assign role '${roleName}' to new user: ${userRoleResponse.status}`);
+        } else {
+          console.log(`[AuthService] Successfully assigned role '${roleName}' to user ${keycloakUserId}`);
+        }
+      } else {
+        console.warn(`[AuthService] Keycloak role '${roleName}' not found in realm. User created without role mapping.`);
       }
     }
 
@@ -299,6 +324,7 @@ export class AuthService {
         email,
         name: `${firstName} ${lastName}`,
         password: 'keycloak-managed',
+        role: userRole as any,
       },
     });
 
@@ -307,6 +333,79 @@ export class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
+    };
+  }
+
+  async updateUserRole(userId: string, newRole: 'USER' | 'ADMIN' | 'MECHANIC' | 'SUPER_ADMIN') {
+    const keycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
+    const realm = process.env.KEYCLOAK_REALM || 'reno';
+    const adminUser = process.env.KEYCLOAK_ADMIN || 'admin';
+    const adminPassword = process.env.KEYCLOAK_ADMIN_PASSWORD || 'admin';
+
+    const tokenUrl = `${keycloakUrl}/realms/master/protocol/openid-connect/token`;
+
+    const tokenResponse = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: 'admin-cli',
+        grant_type: 'password',
+        username: adminUser,
+        password: adminPassword,
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      throw new UnauthorizedException('Failed to obtain admin token from Keycloak');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const adminToken = tokenData.access_token;
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const keycloakUserId = user.id;
+
+    const roleName = newRole.toLowerCase();
+    
+    const rolesResponse = await fetch(`${keycloakUrl}/admin/realms/${realm}/roles/${roleName}`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` },
+    });
+    
+    if (rolesResponse.ok) {
+      const roleData = await rolesResponse.json();
+      
+      const roleResponse = await fetch(`${keycloakUrl}/admin/realms/${realm}/users/${keycloakUserId}/role-mappings/realm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify([
+          { id: roleData.id, name: roleData.name },
+        ]),
+      });
+
+      if (!roleResponse.ok) {
+        console.warn(`[AuthService] Could not assign role '${roleName}' to user ${userId}`);
+      }
+    } else {
+      console.warn(`[AuthService] Keycloak role '${roleName}' not found in realm`);
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole as any },
+    });
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      name: updated.name,
+      role: updated.role,
     };
   }
 

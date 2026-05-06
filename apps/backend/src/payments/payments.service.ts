@@ -31,6 +31,13 @@ export class PaymentsService {
     });
   }
 
+  async findAllAdmin() {
+    return this.prisma.payment.findMany({
+      include: { user: true, tenant: true },
+      where: { deletedAt: null },
+    });
+  }
+
   async exportCsv(tenantId: string) {
     const payments = await this.findAll(tenantId);
     
