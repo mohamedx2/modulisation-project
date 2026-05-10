@@ -120,10 +120,10 @@ export default function AddVehiclePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6 pb-24">
-      <div className="mb-12">
-        <h1 className="text-4xl font-black tracking-tight italic uppercase">Ajouter un Véhicule</h1>
-        <p className="text-muted-foreground font-medium mt-2">Numérisez votre carte grise pour une configuration instantanée.</p>
+    <div className="max-w-4xl mx-auto py-6 sm:py-8 lg:py-12 px-4 sm:px-6 pb-16 sm:pb-24">
+      <div className="mb-6 sm:mb-8 lg:mb-12">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight italic uppercase">Ajouter un Véhicule</h1>
+        <p className="text-muted-foreground font-medium mt-2 text-sm sm:text-base">Numérisez votre carte grise pour une configuration instantanée.</p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -134,11 +134,11 @@ export default function AddVehiclePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <Card
-              className="rounded-[2.5rem] border-2 border-dashed border-border/50 bg-muted/20 hover:bg-muted/30 transition-all cursor-pointer overflow-hidden"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <CardContent className="p-16 flex flex-col items-center justify-center text-center">
+              <Card
+                className="rounded-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] border-2 border-dashed border-border/50 bg-muted/20 hover:bg-muted/30 transition-all cursor-pointer overflow-hidden"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <CardContent className="p-8 sm:p-12 lg:p-16 flex flex-col items-center justify-center text-center">
                 <input
                   type="file"
                   ref={fileInputRef}

@@ -59,7 +59,7 @@ export default function DashboardOverview() {
   }
 
   return (
-    <div className="p-8 lg:p-12 max-w-[1600px] mx-auto space-y-12 relative overflow-hidden">
+    <div className="p-4 sm:p-6 lg:p-8 xl:p-12 max-w-[1600px] mx-auto space-y-6 sm:space-y-8 lg:space-y-12 relative overflow-hidden">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64 z-0 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -ml-32 -mb-32 z-0 pointer-events-none" />
@@ -70,21 +70,21 @@ export default function DashboardOverview() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2 relative z-10"
       >
-        <h1 className="text-5xl lg:text-6xl font-black tracking-tighter uppercase italic">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase italic">
           Bonjour, <span className="text-primary">{user?.name?.split(' ')[0] || "Client"}</span>
         </h1>
-        <p className="text-muted-foreground font-bold text-lg max-w-2xl">
+        <p className="text-muted-foreground font-bold text-base sm:text-lg max-w-2xl">
           Bienvenue sur votre espace <span className="text-foreground">Renault Axis</span>. Voici l'état en temps réel de votre parc automobile.
         </p>
       </motion.div>
 
-      <div className="flex flex-col lg:flex-row gap-12 relative z-10">
+      <div className="flex flex-col xl:flex-row gap-6 sm:gap-8 lg:gap-12 relative z-10">
         {/* Main Content Area */}
-        <div className="flex-1 space-y-16">
+        <div className="flex-1 space-y-8 sm:space-y-12 lg:space-y-16">
           {/* Quick Actions Grid */}
-          <section className="space-y-6">
+          <section className="space-y-4 sm:space-y-6">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Actions Rapides</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { label: "Prendre RDV", desc: "RÉSERVEZ EN 1 MINUTE", icon: Plus, path: "/dashboard/tickets", primary: true },
                 { label: "Mes RDVs", desc: "CONSULTEZ VOS PLANNINGS", icon: Calendar, path: "/dashboard/my-rdv" },
@@ -130,21 +130,21 @@ export default function DashboardOverview() {
           </section>
 
           {/* Vehicle Management */}
-          <section className="space-y-8">
-            <div className="flex items-center justify-between">
+          <section className="space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <h2 className="text-3xl font-black uppercase tracking-tighter italic">MES VÉHICULES</h2>
-                <div className="h-1.5 w-24 bg-primary rounded-full" />
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tighter italic">MES VÉHICULES</h2>
+                <div className="h-1.5 w-16 sm:w-24 bg-primary rounded-full" />
               </div>
               <Button 
                 onClick={() => router.push("/dashboard/vehicles/add")}
-                className="rounded-2xl font-black uppercase italic tracking-tight h-12 px-8 shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-95"
+                className="rounded-xl sm:rounded-2xl font-black uppercase italic tracking-tight h-10 sm:h-12 px-4 sm:px-8 shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-95 text-xs sm:text-sm"
               >
-                <Car className="w-5 h-5 mr-2" /> Ajouter un véhicule
+                <Car className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> <span className="hidden sm:inline">Ajouter un véhicule</span><span className="sm:hidden">Add</span>
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
               {vehicles.map((vehicle, idx) => (
                 <motion.div
                   key={vehicle.id || idx}
@@ -204,13 +204,13 @@ export default function DashboardOverview() {
         </div>
 
         {/* Right Sidebar Tracker */}
-        <div className="w-full lg:w-[400px] space-y-8">
+        <div className="w-full xl:w-[400px] space-y-6 sm:space-y-8">
            <motion.div
              initial={{ opacity: 0, x: 20 }}
              animate={{ opacity: 1, x: 0 }}
              transition={{ delay: 0.3 }}
            >
-             <Card className="bg-zinc-950 text-white rounded-[2.5rem] p-10 space-y-10 overflow-hidden relative border-none shadow-2xl">
+             <Card className="bg-zinc-950 text-white rounded-2xl sm:rounded-[2rem] lg:rounded-[2.5rem] p-6 sm:p-8 lg:p-10 space-y-6 sm:space-y-8 lg:space-y-10 overflow-hidden relative border-none shadow-2xl">
                 <div className="relative z-10 space-y-10">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">

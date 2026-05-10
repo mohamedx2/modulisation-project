@@ -224,14 +224,14 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-12 pb-12 p-8 lg:p-12 relative overflow-hidden">
+    <div className="max-w-[1400px] mx-auto space-y-6 sm:space-y-8 lg:space-y-12 pb-6 sm:pb-8 lg:pb-12 px-4 sm:px-6 lg:px-8 xl:px-12 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -mr-48 -mt-48 z-0 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[200px] sm:w-[300px] lg:w-[400px] h-[200px] sm:h-[300px] lg:h-[400px] bg-primary/5 rounded-full blur-[60px] sm:blur-[80px] lg:blur-[100px] -mr-24 sm:-mr-36 lg:-mr-48 -mt-24 sm:-mt-36 lg:-mt-48 z-0 pointer-events-none" />
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 lg:gap-8 relative z-10">
         <div className="space-y-2">
-          <h1 className="text-5xl font-black tracking-tight italic uppercase leading-none">Historique <span className="text-primary italic">Activité</span></h1>
-          <p className="text-muted-foreground font-bold text-lg">Consultez l&apos;intégralité de vos interventions et transactions.</p>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight italic uppercase leading-none">Historique <span className="text-primary italic">Activité</span></h1>
+          <p className="text-muted-foreground font-bold text-sm sm:text-lg">Consultez l&apos;intégralité de vos interventions et transactions.</p>
         </div>
         <div className="flex items-center gap-4">
           <Button onClick={handleExportPDF} variant="outline" className="h-12 rounded-2xl font-black uppercase italic tracking-tight gap-2 border-primary/20 text-primary hover:bg-primary/10 transition-all active:scale-95">

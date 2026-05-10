@@ -119,16 +119,16 @@ export default function MyRDVPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10 px-4 sm:px-6 lg:px-0 pb-8 sm:pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
         <div>
-          <Badge variant="outline" className="mb-3 px-3 py-1 border-primary/30 text-primary font-black uppercase italic tracking-widest bg-primary/5">
+          <Badge variant="outline" className="mb-3 px-3 py-1 border-primary/30 text-primary font-black uppercase italic tracking-widest bg-primary/5 text-xs">
             Espace Client Renault
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tighter italic uppercase leading-none">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter italic uppercase leading-none">
             Mes <span className="text-primary">Rendez-vous</span>
           </h1>
-          <p className="text-muted-foreground font-medium mt-3 text-sm sm:text-base max-w-md">
+          <p className="text-muted-foreground font-medium mt-3 text-xs sm:text-sm max-w-md">
             Gérez vos interventions techniques et optimisez la performance de votre véhicule Renault Axis.
           </p>
         </div>

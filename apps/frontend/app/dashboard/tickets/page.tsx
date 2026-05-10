@@ -198,20 +198,20 @@ export default function ReservationPage() {
   };
 
   return (
-        <div className="max-w-[1400px] mx-auto py-12 px-8 lg:p-12 pb-24 relative overflow-hidden">
+        <div className="max-w-[1400px] mx-auto py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8 xl:px-12 pb-16 sm:pb-20 lg:pb-24 relative overflow-hidden">
           {/* Decorative Background Elements */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64 z-0 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -ml-32 -mb-32 z-0 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[200px] sm:w-[300px] lg:w-[500px] h-[200px] sm:h-[300px] lg:h-[500px] bg-primary/5 rounded-full blur-[80px] sm:blur-[100px] lg:blur-[120px] -mr-32 sm:-mr-48 lg:-mr-64 -mt-32 sm:-mt-48 lg:-mt-64 z-0 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[150px] sm:w-[200px] lg:w-[300px] h-[150px] sm:h-[200px] lg:h-[300px] bg-primary/5 rounded-full blur-[60px] sm:blur-[80px] lg:blur-[100px] -ml-16 sm:-ml-32 lg:-ml-32 -mb-16 sm:-mb-32 lg:-mb-32 z-0 pointer-events-none" />
 
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-16 relative z-10 text-center space-y-4"
+            className="mb-8 sm:mb-12 lg:mb-16 relative z-10 text-center space-y-4"
           >
-            <h1 className="text-5xl lg:text-6xl font-black tracking-tighter uppercase italic leading-none">Prendre <span className="text-primary">RDV</span></h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto font-bold text-lg">Réservez votre prochaine intervention en quelques clics avec le service premium Renault Axis.</p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase italic leading-none">Prendre <span className="text-primary">RDV</span></h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto font-bold text-sm sm:text-lg">Réservez votre prochaine intervention en quelques clics avec le service premium Renault Axis.</p>
 
-            <div className="flex items-center justify-center mt-16 relative max-w-xl mx-auto">
+            <div className="flex items-center justify-center mt-8 sm:mt-12 lg:mt-16 relative max-w-xs sm:max-w-md lg:max-w-xl mx-auto px-4">
               <div className="absolute top-1/2 left-0 w-full h-1.5 bg-muted -translate-y-1/2 -z-10 rounded-full" />
               <motion.div
                 initial={{ width: 0 }}

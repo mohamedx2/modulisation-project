@@ -85,23 +85,23 @@ export default function OcrScannerPage() {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto space-y-12 relative overflow-hidden">
+    <div className="p-4 sm:p-6 lg:p-8 xl:p-12 max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-12 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64 z-0 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] -ml-32 -mb-32 z-0 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[200px] sm:w-[300px] lg:w-[500px] h-[200px] sm:h-[300px] lg:h-[500px] bg-primary/5 rounded-full blur-[80px] sm:blur-[100px] lg:blur-[120px] -mr-32 sm:-mr-48 lg:-mr-64 -mt-32 sm:-mt-48 lg:-mt-64 z-0 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[150px] sm:w-[200px] lg:w-[300px] h-[150px] sm:h-[200px] lg:h-[300px] bg-primary/5 rounded-full blur-[60px] sm:blur-[80px] lg:blur-[100px] -ml-16 sm:-ml-32 lg:-ml-32 -mb-16 sm:-mb-32 lg:-mb-32 z-0 pointer-events-none" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-12 relative z-10"
+        className="mb-6 sm:mb-8 lg:mb-12 relative z-10"
       >
-        <h1 className="text-5xl lg:text-6xl font-black tracking-tighter uppercase italic leading-none">Diagnostic <span className="text-primary italic">Optique</span></h1>
-        <p className="text-muted-foreground mt-4 font-bold text-lg max-w-2xl">Système de reconnaissance automatique de matricules (LPR) haute précision par <span className="text-foreground">Renault Axis</span>.</p>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase italic leading-none">Diagnostic <span className="text-primary italic">Optique</span></h1>
+        <p className="text-muted-foreground mt-3 sm:mt-4 font-bold text-base sm:text-lg max-w-2xl">Système de reconnaissance automatique de matricules (LPR) haute précision par <span className="text-foreground">Renault Axis</span>.</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 relative z-10">
         <Card 
-          className={`rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500 border-none relative group ${
+          className={`rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500 border-none relative group ${
             isDragOver ? 'ring-4 ring-primary bg-primary/5' : 'bg-white dark:bg-zinc-900'
           }`}
           onDragOver={handleDragOver}
@@ -109,7 +109,7 @@ export default function OcrScannerPage() {
           onDrop={handleDrop}
           onClick={() => !file && fileInputRef.current?.click()}
         >
-          <CardContent className="p-12 flex flex-col items-center justify-center min-h-[500px] h-full cursor-pointer relative">
+          <CardContent className="p-6 sm:p-8 lg:p-12 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] h-full cursor-pointer relative">
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -187,9 +187,9 @@ export default function OcrScannerPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[3rem] border-none shadow-sm bg-zinc-50 dark:bg-zinc-900/50 flex flex-col relative overflow-hidden">
-          <CardContent className="p-12 flex flex-col h-full relative z-10">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-12 flex items-center gap-2">
+        <Card className="rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] border-none shadow-sm bg-zinc-50 dark:bg-zinc-900/50 flex flex-col relative overflow-hidden">
+          <CardContent className="p-6 sm:p-8 lg:p-12 flex flex-col h-full relative z-10">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-6 sm:mb-8 lg:mb-12 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" /> Rapport de Scan
             </h3>
             
