@@ -138,3 +138,5 @@ coverage/
 # Docker
 docker-compose.override.yml
 
+.agents/
+.opencode/

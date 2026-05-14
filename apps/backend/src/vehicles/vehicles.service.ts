@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 const DEFAULT_CAR_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDQwQzEyIDM2LjY4NCAxNC42ODQgMzQgMTggMzRIMzJDMzUuMzE2IDM0IDM4IDM2LjY4NCAzOCA0MFY0MkgxMlY0MFoiIGZpbGw9IiM2QjcyODAiLz4KPHBhdGggZD0iTTIwIDMwTDI4IDI2TDMyIDMwVjM4SDIwVjMwWiIgZmlsbD0iIzZCNzI4MCIvPgo8Y2lyY2xlIGN4PSIyNCIgY3k9IjQwIiByPSI0IiBmaWxsPSIjMkQzMjM4Ii8+CjxjaXJjbGUgY3g9IjMyIiBjeT0iNDAiIHI9IjQiIGZpbGw9IiMyRDMxMjgiLz4KPHBhdGggZD0iTTE2IDM4SDQyVjQySDE2VjM4WiIgZmlsbD0iIzJEMzIzOCIvPgo8L3N2Zz4K';
@@ -58,6 +58,15 @@ export class VehiclesService {
   }
 
   async create(tenantId: string, data: { name: string; plate: string; img?: string; imageData?: Buffer }) {
+    // Check if vehicle with same plate already exists
+    const existingVehicle = await this.prisma.vehicle.findUnique({
+      where: { plate: data.plate },
+    });
+
+    if (existingVehicle) {
+      throw new ConflictException(`La plaque ${data.plate} est déjà enregistrée dans le système.`);
+    }
+
     // Ensure the tenant exists (auto-create on fresh databases)
     await this.prisma.tenant.upsert({
       where: { id: tenantId },

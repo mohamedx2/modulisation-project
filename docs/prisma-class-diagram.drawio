@@ -1,0 +1,651 @@
+<mxfile host="Electron" modified="2026-05-10T22:00:00.000Z" version="26.0.0">
+  <diagram id="prisma-class" name="Prisma Schema Class Diagram">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1"
+                  tooltips="1" connect="1" arrows="1" fold="1"
+                  page="1" pageScale="1" pageWidth="1600" pageHeight="1100"
+                  math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== TITLE & LEGEND ==================== -->
+        <mxCell id="title" value="&lt;b&gt;Prisma Schema - UML Class Diagram&lt;/b&gt;"
+                style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#2D3748;"
+                vertex="1" parent="1">
+          <mxGeometry x="600" y="20" width="400" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Legend Container -->
+        <mxCell id="legend" value="&lt;b&gt;Legend&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#F7FAFC;strokeColor=#CBD5E0;fontSize=11;fontColor=#4A5568;"
+                vertex="1" parent="1">
+          <mxGeometry x="50" y="20" width="180" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_div" value=""
+                style="swimlane;startSize=0;fillColor=none;strokeColor=#CBD5E0;"
+                vertex="1" parent="legend">
+          <mxGeometry y="30" width="180" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_1" value="&lt;span style='color:#2D3748;'&gt;•&lt;/span&gt; &lt;b&gt;PK&lt;/b&gt; Primary Key"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;"
+                vertex="1" parent="legend">
+          <mxGeometry y="40" width="180" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_2" value="&lt;span style='color:#2D3748;'&gt;•&lt;/span&gt; &lt;b&gt;FK&lt;/b&gt; Foreign Key"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;"
+                vertex="1" parent="legend">
+          <mxGeometry y="65" width="180" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_3" value="&lt;span style='color:#2D3748;'&gt;•&lt;/span&gt; &lt;i&gt;italic&lt;/i&gt; Relationship"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;"
+                vertex="1" parent="legend">
+          <mxGeometry y="90" width="180" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_4" value="&lt;span style='color:#2D3748;'&gt;•&lt;/span&gt; ? Nullable Field"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;"
+                vertex="1" parent="legend">
+          <mxGeometry y="115" width="180" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_5" value="&lt;span style='color:#2D3748;'&gt;—&lt;/span&gt; 1..* One-to-Many"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;"
+                vertex="1" parent="legend">
+          <mxGeometry y="140" width="180" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_6" value="&lt;span style='color:#2D3748;'&gt;- - -&lt;/span&gt; «use» Dependency"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;"
+                vertex="1" parent="legend">
+          <mxGeometry y="165" width="180" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ENUM: Role ==================== -->
+        <mxCell id="enum_role" value="«enumeration»&#xa;&lt;b&gt;Role&lt;/b&gt;"
+                style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#FFFAF0;strokeColor=#D69E2E;fontSize=12;fontColor=#744210;rounded=1;arcSize=8;"
+                vertex="1" parent="1">
+          <mxGeometry x="1380" y="90" width="160" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_role_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#D69E2E;"
+                vertex="1" parent="enum_role">
+          <mxGeometry y="40" width="160" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_role_v1" value="&lt;span style='color:#744210;'&gt;●&lt;/span&gt; USER"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=11;fontColor=#2D3748;"
+                vertex="1" parent="enum_role">
+          <mxGeometry y="50" width="160" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_role_v2" value="&lt;span style='color:#D69E2E;'&gt;●&lt;/span&gt; MECHANIC"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=11;fontColor=#2D3748;"
+                vertex="1" parent="enum_role">
+          <mxGeometry y="72" width="160" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_role_v3" value="&lt;span style='color:#3182CE;'&gt;●&lt;/span&gt; ADMIN"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=11;fontColor=#2D3748;"
+                vertex="1" parent="enum_role">
+          <mxGeometry y="94" width="160" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="enum_role_v4" value="&lt;span style='color:#805AD5;'&gt;●&lt;/span&gt; SUPER_ADMIN"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=11;fontColor=#2D3748;"
+                vertex="1" parent="enum_role">
+          <mxGeometry y="116" width="160" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CORE ENTITY: Tenant ==================== -->
+        <mxCell id="cls_tenant" value="&lt;b&gt;Tenant&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#EBF8FF;strokeColor=#3182CE;fontSize=14;fontColor=#2B6CB0;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="650" y="90" width="280" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#3182CE;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="45" width="280" height="1" as="geometry" />
+        </mxCell>
+        <!-- Attributes -->
+        <mxCell id="cls_tenant_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="55" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_a2" value="name: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="77" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_a3" value="isActive: Boolean @default(true)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="99" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_a4" value="createdAt: DateTime @default(now)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="121" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_a5" value="updatedAt: DateTime @updatedAt"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="143" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_a6" value="deletedAt: DateTime?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="165" width="280" height="22" as="geometry" />
+        </mxCell>
+        <!-- Divider -->
+        <mxCell id="cls_tenant_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#90CDF4;dashed=1;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="190" width="280" height="1" as="geometry" />
+        </mxCell>
+        <!-- Relationships -->
+        <mxCell id="cls_tenant_r1" value="&lt;i&gt;users: User[]&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#3182CE;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="200" width="280" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_tenant_r2" value="&lt;i&gt;tickets, payments, ocrTasks, vehicles&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=9;fontColor=#3182CE;"
+                vertex="1" parent="cls_tenant">
+          <mxGeometry y="218" width="280" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CLASS: User ==================== -->
+        <mxCell id="cls_user" value="&lt;b&gt;User&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#F0FFF4;strokeColor=#38A169;fontSize=14;fontColor=#276749;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="100" y="380" width="280" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#38A169;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="45" width="280" height="1" as="geometry" />
+        </mxCell>
+        <!-- Attributes -->
+        <mxCell id="cls_user_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="55" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a2" value="email: String {&lt;b&gt;unique&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="77" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a3" value="name: String?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="99" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a4" value="password: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="121" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a5" value="role: &lt;b&gt;Role&lt;/b&gt; @default(USER)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#D69E2E;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="143" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a6" value="tenantId: String? {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#3182CE;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="165" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a7" value="createdAt: DateTime @default(now)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="187" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a8" value="updatedAt: DateTime @updatedAt"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="209" width="280" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_a9" value="deletedAt: DateTime?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="231" width="280" height="22" as="geometry" />
+        </mxCell>
+        <!-- Divider -->
+        <mxCell id="cls_user_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#9AE6B4;dashed=1;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="258" width="280" height="1" as="geometry" />
+        </mxCell>
+        <!-- Relationships -->
+        <mxCell id="cls_user_r1" value="&lt;i&gt;tenant: Tenant?&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#38A169;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="268" width="280" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_r2" value="&lt;i&gt;tickets, payments, ocrTasks, auditLogs&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=9;fontColor=#38A169;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="286" width="280" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_r3" value="&lt;i&gt;auditLogs: AuditLog[]&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#38A169;"
+                vertex="1" parent="cls_user">
+          <mxGeometry y="304" width="280" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CLASS: Ticket ==================== -->
+        <mxCell id="cls_ticket" value="&lt;b&gt;Ticket&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#FFFAF0;strokeColor=#D69E2E;fontSize=14;fontColor=#975A16;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="440" y="380" width="260" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#D69E2E;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="45" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="55" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a2" value="title: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="77" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a3" value="description: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="99" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a4" value="status: String @default(OPEN)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="121" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a5" value="createdBy: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#38A169;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="143" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a6" value="tenantId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#3182CE;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="165" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a7" value="scheduledAt: DateTime?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="187" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_a8" value="createdAt: DateTime @default(now)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="209" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#F6E05E;dashed=1;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="235" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_r1" value="&lt;i&gt;creator: User&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#D69E2E;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="245" width="260" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ticket_r2" value="&lt;i&gt;tenant: Tenant&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#D69E2E;"
+                vertex="1" parent="cls_ticket">
+          <mxGeometry y="263" width="260" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CLASS: Payment ==================== -->
+        <mxCell id="cls_payment" value="&lt;b&gt;Payment&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#FED7D7;strokeColor=#E53E3E;fontSize=14;fontColor=#C53030;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="780" y="380" width="260" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#E53E3E;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="45" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="55" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_a2" value="amount: Float"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="77" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_a3" value="status: String @default(PENDING)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="99" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_a4" value="userId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#38A169;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="121" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_a5" value="tenantId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#3182CE;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="143" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_a6" value="createdAt: DateTime @default(now)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="165" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#FC8181;dashed=1;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="192" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_r1" value="&lt;i&gt;user: User&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#E53E3E;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="202" width="260" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_payment_r2" value="&lt;i&gt;tenant: Tenant&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#E53E3E;"
+                vertex="1" parent="cls_payment">
+          <mxGeometry y="220" width="260" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CLASS: OcrTask ==================== -->
+        <mxCell id="cls_ocrtask" value="&lt;b&gt;OcrTask&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#E9D8FD;strokeColor=#805AD5;fontSize=14;fontColor=#553C9A;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1100" y="380" width="260" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#805AD5;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="45" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="55" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a2" value="matricule: String?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="77" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a3" value="rawText: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="99" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a4" value="confidence: Float?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="121" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a5" value="userId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#38A169;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="143" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a6" value="tenantId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#3182CE;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="165" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_a7" value="createdAt: DateTime @default(now)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="187" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#B794F4;dashed=1;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="213" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_r1" value="&lt;i&gt;user: User&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#805AD5;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="223" width="260" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ocrtask_r2" value="&lt;i&gt;tenant: Tenant&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#805AD5;"
+                vertex="1" parent="cls_ocrtask">
+          <mxGeometry y="241" width="260" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CLASS: Vehicle ==================== -->
+        <mxCell id="cls_vehicle" value="&lt;b&gt;Vehicle&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#BEE3F8;strokeColor=#2B6CB0;fontSize=14;fontColor=#2C5282;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="780" y="680" width="260" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#2B6CB0;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="45" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="55" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a2" value="name: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="77" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a3" value="plate: String {&lt;b&gt;unique&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="99" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a4" value="img: String?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="121" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a5" value="imageData: Bytes?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="143" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a6" value="lastService: String?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="165" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a7" value="health: Int @default(100)"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="187" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_a8" value="tenantId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#3182CE;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="209" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#90CDF4;dashed=1;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="235" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_r1" value="&lt;i&gt;tenant: Tenant&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2B6CB0;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="245" width="260" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_r2" value="&lt;i&gt;createdAt, updatedAt, deletedAt&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=9;fontColor=#2B6CB0;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="263" width="260" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_vehicle_r3" value="&lt;i&gt;@@index([tenantId])&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=9;fontColor=#718096;"
+                vertex="1" parent="cls_vehicle">
+          <mxGeometry y="281" width="260" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CLASS: AuditLog ==================== -->
+        <mxCell id="cls_auditlog" value="&lt;b&gt;AuditLog&lt;/b&gt;"
+                style="swimlane;fontStyle=1;align=center;startSize=45;fillColor=#E2E8F0;strokeColor=#4A5568;fontSize=14;fontColor=#2D3748;rounded=1;arcSize=8;shadow=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1100" y="680" width="260" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_d1" value=""
+                style="line;strokeWidth=2;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#4A5568;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="45" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a1" value="&lt;b&gt;id&lt;/b&gt;: String {PK, @id @default(uuid())}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="55" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a2" value="action: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="77" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a3" value="entity: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow:hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="99" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a4" value="entityId: String"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#2D3748;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="121" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a5" value="details: Json?"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="143" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a6" value="userId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#38A169;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="165" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_a7" value="tenantId: String {&lt;b&gt;FK&lt;/b&gt;}"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor:#3182CE;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="187" width="260" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_d2" value=""
+                style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;rotatable=0;pointerEvents=1;strokeColor=#CBD5E0;dashed=1;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="212" width="260" height="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_auditlog_r1" value="&lt;i&gt;user: User, tenant: Tenant&lt;/i&gt;"
+                style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;whiteSpace=wrap;overflow=hidden;rotatable=0;fontSize=10;fontColor=#4A5568;"
+                vertex="1" parent="cls_auditlog">
+          <mxGeometry y="222" width="260" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== RELATIONSHIPS ==================== -->
+
+        <!-- Tenant to User (1 to Many) -->
+        <mxCell id="rel_tenant_user" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#3182CE;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_tenant" target="cls_user" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Tenant to Ticket -->
+        <mxCell id="rel_tenant_ticket" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#3182CE;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_tenant" target="cls_ticket" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Tenant to Payment -->
+        <mxCell id="rel_tenant_payment" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=0.65;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#3182CE;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_tenant" target="cls_payment" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Tenant to OcrTask -->
+        <mxCell id="rel_tenant_ocrtask" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#3182CE;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_tenant" target="cls_ocrtask" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Tenant to Vehicle -->
+        <mxCell id="rel_tenant_vehicle" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#3182CE;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_tenant" target="cls_vehicle" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="330" />
+              <mxPoint x="910" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User to Ticket (1 to Many) -->
+        <mxCell id="rel_user_ticket" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#38A169;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_user" target="cls_ticket" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- User to Payment -->
+        <mxCell id="rel_user_payment" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#38A169;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_user" target="cls_payment" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="520" />
+              <mxPoint x="780" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User to OcrTask -->
+        <mxCell id="rel_user_ocrtask" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#38A169;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_user" target="cls_ocrtask" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="700" />
+              <mxPoint x="1100" y="700" />
+              <mxPoint x="1100" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User to AuditLog -->
+        <mxCell id="rel_user_auditlog" value="1..*"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#38A169;fontColor=#2D3748;rounded=1;jumpSize=6;jumpStyle=arc;"
+                edge="1" source="cls_user" target="cls_auditlog" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="540" />
+              <mxPoint x="1100" y="540" />
+              <mxPoint x="1100" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User USES Role (Dependency) -->
+        <mxCell id="rel_user_role" value="«use»"
+                style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;startArrow=none;dashed=1;dashPattern=1 4;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#D69E2E;fontColor=#D69E2E;rounded=1;"
+                edge="1" source="cls_user" target="enum_role" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== FOOTER NOTE ==================== -->
+        <mxCell id="footer" value="&lt;i&gt;Soft delete pattern with deletedAt field • All entities have createdAt/updatedAt timestamps • Multi-tenant architecture with tenant isolation&lt;/i&gt;"
+                style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#718096;"
+                vertex="1" parent="1">
+          <mxGeometry x="350" y="1020" width="900" height="30" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

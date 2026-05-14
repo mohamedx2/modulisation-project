@@ -113,7 +113,7 @@ export default function AddVehiclePage() {
       router.push("/dashboard");
     } catch (err) {
       console.error("Save failed", err);
-      toast.error("Erreur lors de l'enregistrement.");
+      toast.error(err.message || "Erreur lors de l'enregistrement.");
     } finally {
       setLoading(false);
     }
