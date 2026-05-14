@@ -111,7 +111,7 @@ export default function AddVehiclePage() {
 
       toast.success("Véhicule ajouté avec succès !");
       router.push("/dashboard");
-    } catch (err) {
+    } catch (err:any) {
       console.error("Save failed", err);
       toast.error(err.message || "Erreur lors de l'enregistrement.");
     } finally {
